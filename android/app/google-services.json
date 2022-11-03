@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "843473749436",
+    "project_id": "seii-mobile-health-app",
+    "storage_bucket": "seii-mobile-health-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:843473749436:android:ef392ba5a5c391b62d97b9",
+        "android_client_info": {
+          "package_name": "edu.uco.lholbrook1.se2.mobile_health_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "843473749436-6isvtekh54lco0drmsrf2u2sp5i8vv66.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEqhCB4aDQePECkcdcVWHrd_G0oobIHy4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "843473749436-6isvtekh54lco0drmsrf2u2sp5i8vv66.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "843473749436-37enrjerr38tu93mnsppa8vr6h6q3caq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "edu.uco.lholbrook1.se2.mobileHealthApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
