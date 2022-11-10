@@ -137,7 +137,6 @@ class _StartState extends State<StartScreen> {
                     ),
                   ),
                 ),
-                child: const Text('SIGN UP'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.blueAccent,
                   padding: const EdgeInsets.symmetric(
@@ -149,6 +148,7 @@ class _StartState extends State<StartScreen> {
                     fontSize: 17.0,
                   ),
                 ),
+                child: const Text('SIGN UP'),
               ),
             ),
           ),
@@ -236,7 +236,6 @@ class _Controller {
         email: email!,
         password: password!,
       );
-      showSnackBar(context: state.context, message: 'Login successful');
       Navigator.pushNamed(
         state.context,
         HomeScreen.routeName,
