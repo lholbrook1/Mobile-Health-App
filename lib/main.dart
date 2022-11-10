@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:mobile_health_app/viewscreen/start_screen.dart';
 import 'firebase_options.dart';
+import 'model/constant.dart';
+import 'viewscreen/home_screen.dart';
+import 'viewscreen/view_util.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,6 +71,16 @@ class _MyHomePageState extends State<MyHomePage> {
       initialRoute: StartScreen.routeName,
       routes: {
         StartScreen.routeName: (context) => const StartScreen(),
+      HomeScreen.routeName: (context) {
+          Object? args = ModalRoute.of(context)?.settings.arguments;
+          if (args == null) {
+            showSnackBar(
+                context: context, message: 'args is null for Home Screen');
+          }
+          var arguments = args as Map;
+          var user = arguments[ARGS.USER];
+          return HomeScreen(user: user);
+        },
       }
     );
   }

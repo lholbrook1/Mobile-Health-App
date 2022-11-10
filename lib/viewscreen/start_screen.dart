@@ -1,8 +1,11 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_health_app/viewscreen/view_util.dart';
 
 import '../controller/auth_controller.dart';
+import '../model/constant.dart';
+import 'home_screen.dart';
 
 class StartScreen extends StatefulWidget {
   const StartScreen({Key? key}) : super(key: key);
@@ -33,7 +36,6 @@ class _StartState extends State<StartScreen> {
           Container(
             color: Colors.white,
           ),
-          //  Image.asset('images/Background.png'),
           Container(
             height: 475,
             decoration: const BoxDecoration(
@@ -186,7 +188,7 @@ class _StartState extends State<StartScreen> {
                               onSaved: con.savePassword,
                             ),
                             ElevatedButton(
-                              onPressed: con.loginPopUp,
+                              onPressed: con.signIn,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blueAccent,
                               ),
@@ -223,23 +225,6 @@ class _Controller {
   String? email;
   String? password;
 
-  void loginPopUp() {
-    FormState? currentState = state.formKey.currentState;
-    if (currentState == null) return;
-    if (!currentState.validate()) return;
-    currentState.save();
-
-    // if (userInfo.email == '') {
-    //   showSnackBar(
-    //     context: state.context,
-    //     message: 'Authentication failed. Incorrect email/password',
-    //   );
-    // } else {
-    //   Navigator.pushNamed(state.context, MoviesScreen.routeName,
-    //       arguments: movieList);
-    // }
-  }
-
   Future<void> signIn() async {
     FormState? currentState = state.formKey.currentState;
     if (currentState == null) return;
@@ -250,6 +235,14 @@ class _Controller {
       user = await AuthController.signIn(
         email: email!,
         password: password!,
+      );
+      showSnackBar(context: state.context, message: 'Login successful');
+      Navigator.pushNamed(
+        state.context,
+        HomeScreen.routeName,
+        arguments: {
+          ARGS.USER: user,
+        },
       );
     } catch (e) {
       print('$e');
