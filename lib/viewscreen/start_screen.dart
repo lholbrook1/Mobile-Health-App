@@ -1,6 +1,7 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile_health_app/Model/user.dart';
+import 'package:mobile_health_app/controller/firestore_controller.dart';
 import 'package:mobile_health_app/viewscreen/view_util.dart';
 
 import '../controller/auth_controller.dart';
@@ -236,7 +237,7 @@ class _Controller {
         email: email!,
         password: password!,
       );
-      Navigator.pushNamed(
+      await Navigator.pushNamed(
         state.context,
         HomeScreen.routeName,
         arguments: {
@@ -260,6 +261,10 @@ class _Controller {
         email: email!,
         password: password!,
       );
+
+      UserProfile userprof = UserProfile.set(email!.trim());
+      FirestoreController.addUser(userProf: userprof);
+
       showSnackBar(
         context: state.context,
         message: 'Account created!',
