@@ -1,15 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../Model/constant.dart';
-import '../Model/user.dart';
+import '../Model/accelerometer.dart';
 
 class FirestoreController {
   static addUser({
-    required UserProfile userProf,
+    required Accelerometer userProf,
   }) async {
     try {
       DocumentReference ref = await FirebaseFirestore.instance
-          .collection(Constants.USERPROFILE_COLLECTION)
+          .collection(Constants.Accelerometer)
           .add(userProf.toFirestoreDoc());
       return ref.id; // doc id auto-generated.
     } catch (e) {
@@ -17,21 +17,21 @@ class FirestoreController {
     }
   }
 
-  static Future<UserProfile> getUser({
+  static Future<Accelerometer> getUser({
     required String email,
   }) async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection(Constants.USERPROFILE_COLLECTION)
-        .where(DocKeyUserprof.email.name, isEqualTo: email)
+        .collection(Constants.Accelerometer)
+        .where(DocKeyAccelerometer.email.name, isEqualTo: email)
         .get();
 
     for (var doc in querySnapshot.docs) {
       if (doc.data() != null) {
         var document = doc.data() as Map<String, dynamic>;
-        var u = UserProfile.fromFirestoreDoc(doc: document, docId: doc.id);
+        var u = Accelerometer.fromFirestoreDoc(doc: document, docId: doc.id);
         if (u != null) return u;
       }
     }
-    return UserProfile();
+    return Accelerometer();
   }
 }

@@ -4,6 +4,7 @@ import 'package:mobile_health_app/viewscreen/start_screen.dart';
 import 'firebase_options.dart';
 import 'model/constant.dart';
 import 'viewscreen/home_screen.dart';
+import 'viewscreen/settings_screen.dart';
 import 'viewscreen/view_util.dart';
 
 void main() async {
@@ -58,7 +59,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -67,21 +67,22 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return MaterialApp(
-      initialRoute: StartScreen.routeName,
-      routes: {
-        StartScreen.routeName: (context) => const StartScreen(),
+    return MaterialApp(initialRoute: StartScreen.routeName, routes: {
+      StartScreen.routeName: (context) => const StartScreen(),
       HomeScreen.routeName: (context) {
-          Object? args = ModalRoute.of(context)?.settings.arguments;
-          if (args == null) {
-            showSnackBar(
-                context: context, message: 'args is null for Home Screen');
-          }
-          var arguments = args as Map;
-          var user = arguments[ARGS.USER];
-          return HomeScreen(user: user);
-        },
+        Object? args = ModalRoute.of(context)?.settings.arguments;
+        if (args == null) {
+          showSnackBar(
+              context: context, message: 'args is null for Home Screen');
+        }
+        var arguments = args as Map;
+        var user = arguments[ARGS.USER];
+        return HomeScreen(user: user);
+      },
+      SettingsScreen.routeName:(context) {
+        Object
       }
-    );
+      },
+    });
   }
 }

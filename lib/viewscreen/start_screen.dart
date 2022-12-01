@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_health_app/Model/user.dart';
+import 'package:mobile_health_app/Model/accelerometer.dart';
 import 'package:mobile_health_app/controller/firestore_controller.dart';
 import 'package:mobile_health_app/viewscreen/view_util.dart';
 
@@ -262,7 +262,7 @@ class _Controller {
         password: password!,
       );
 
-      UserProfile userprof = UserProfile.set(email!.trim());
+      Accelerometer userprof = Accelerometer.set(email!.trim());
       FirestoreController.addUser(userProf: userprof);
 
       showSnackBar(
