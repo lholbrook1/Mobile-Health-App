@@ -67,22 +67,31 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return MaterialApp(initialRoute: StartScreen.routeName, routes: {
-      StartScreen.routeName: (context) => const StartScreen(),
-      HomeScreen.routeName: (context) {
-        Object? args = ModalRoute.of(context)?.settings.arguments;
-        if (args == null) {
-          showSnackBar(
-              context: context, message: 'args is null for Home Screen');
+    return MaterialApp(
+      initialRoute: StartScreen.routeName,
+      routes: {
+        StartScreen.routeName: (context) => const StartScreen(),
+        HomeScreen.routeName: (context) {
+          Object? args = ModalRoute.of(context)?.settings.arguments;
+          if (args == null) {
+            showSnackBar(
+                context: context, message: 'args is null for Home Screen');
+          }
+          var arguments = args as Map;
+          var user = arguments[ARGS.USER];
+          return HomeScreen(user: user);
+        },
+        SettingsScreen.routeName: (context) {
+          Object? args = ModalRoute.of(context)?.settings.arguments;
+          if (args == null) {
+            showSnackBar(
+                context: context, message: 'args is null for Home Screen');
+          }
+          var arguments = args as Map;
+          var user = arguments[ARGS.USER];
+          return SettingsScreen(user: user);
         }
-        var arguments = args as Map;
-        var user = arguments[ARGS.USER];
-        return HomeScreen(user: user);
       },
-      SettingsScreen.routeName:(context) {
-        Object
-      }
-      },
-    });
+    );
   }
 }
