@@ -3,22 +3,40 @@ enum DocKeyAccelerometer {
   email,
   collectionInterval,
   dataPoints,
+  distanceRecords,
+  totalDayDistance,
+  totalDistance,
 }
 
 class Accelerometer {
+  static const UID = 'uid';
+  static const EMAIL = 'email';
+  static const DATAPOINTS = 'dataPoints';
+  static const INTERVAL = 'collectionInterval';
+  static const DISTANCERECS = 'distanceRecords';
+  static const DAYDISTANCE = 'totalDayDistance';
+  static const TOTALDISTANCE = 'totalDistance';
+
   String? uid; //firestore auto generated id
   String? docId;
   String? email;
   late List<dynamic> dataPoints;
   String? collectionInterval;
+  late List<double> distanceRecords;
+  late double totalDayDistance;
+  late double totalDistance;
 
   Accelerometer({
     this.uid,
     this.docId,
     this.email = '',
     this.collectionInterval = '60',
+    this.totalDayDistance = 0,
+    this.totalDistance = 0,
     List<dynamic>? dataPoints,
+    List<dynamic>? distanceRecords,
   }) {
+    distanceRecords = distanceRecords == null ? [] : [...distanceRecords];
     dataPoints = dataPoints == null ? [] : [...dataPoints];
   }
 
@@ -26,7 +44,10 @@ class Accelerometer {
     this.uid;
     this.docId;
     this.collectionInterval;
+    this.totalDayDistance;
+    this.totalDistance;
     dataPoints = [];
+    distanceRecords = [];
   }
 
   Accelerometer.clone(Accelerometer p) {
@@ -34,6 +55,9 @@ class Accelerometer {
     docId = p.docId;
     email = p.email;
     collectionInterval = p.collectionInterval;
+    distanceRecords = distanceRecords == null ? [] : [...distanceRecords];
+    totalDayDistance = p.totalDayDistance;
+    totalDistance = p.totalDistance;
     dataPoints = dataPoints == null ? [] : [...dataPoints];
   }
 
@@ -43,8 +67,12 @@ class Accelerometer {
     docId = p.docId;
     email = p.email;
     collectionInterval = p.collectionInterval;
+    totalDayDistance = p.totalDayDistance;
+    totalDistance = p.totalDistance;
     dataPoints.clear();
     dataPoints.addAll(p.dataPoints);
+    distanceRecords.clear();
+    distanceRecords.addAll(p.distanceRecords);
   }
 
   //serialization
@@ -54,6 +82,9 @@ class Accelerometer {
       DocKeyAccelerometer.uid.name: uid,
       DocKeyAccelerometer.collectionInterval.name: collectionInterval,
       DocKeyAccelerometer.dataPoints.name: dataPoints,
+      DocKeyAccelerometer.distanceRecords.name: distanceRecords,
+      DocKeyAccelerometer.totalDayDistance.name: totalDayDistance,
+      DocKeyAccelerometer.totalDistance.name: totalDistance,
     };
   }
 
@@ -67,6 +98,9 @@ class Accelerometer {
       collectionInterval:
           doc[DocKeyAccelerometer.collectionInterval.toString()] ??= '60',
       dataPoints: doc[DocKeyAccelerometer.dataPoints.name] ??= [],
+      distanceRecords: doc[DocKeyAccelerometer.distanceRecords.name] ??= [],
+      totalDayDistance: doc[DocKeyAccelerometer.totalDayDistance.name] ??= 0,
+      totalDistance: doc[DocKeyAccelerometer.totalDistance.name] ??= 0,
     );
   }
 

@@ -79,7 +79,8 @@ class _MyHomePageState extends State<MyHomePage> {
           }
           var arguments = args as Map;
           var user = arguments[ARGS.USER];
-          return HomeScreen(user: user);
+          var accelerometer = arguments[ARGS.ACCELEROMETER];
+          return HomeScreen(user: user, accelerometer: accelerometer,);
         },
         SettingsScreen.routeName: (context) {
           Object? args = ModalRoute.of(context)?.settings.arguments;

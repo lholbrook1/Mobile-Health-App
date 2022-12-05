@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class Constants {
   static const devMode = true;
-  static const Accelerometer = 'accelerometer';
+  static const accelerometerCollection = 'accelerometer';
 
   static const List<DropdownMenuItem<String>> menuItems = [
     DropdownMenuItem(value: '15', child: Text('15 minutes')),
@@ -16,4 +16,5 @@ class Constants {
 
 enum ARGS {
   USER,
+  ACCELEROMETER,
 }

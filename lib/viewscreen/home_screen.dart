@@ -1,17 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_health_app/Model/accelerometer.dart';
 import 'package:mobile_health_app/controller/firestore_controller.dart';
+import '../model/accelerometer.dart';
 import '../model/constant.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
     required this.user,
+    required this.accelerometer,
     Key? key,
   }) : super(key: key);
 
   final User user;
+  final Accelerometer accelerometer;
   static const routeName = '/homeScreen';
 
   @override
@@ -73,25 +75,128 @@ class _HomeState extends State<HomeScreen> {
             key: formKey,
             child: Container(
               color: Colors.white,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Distance traveled today",
-                    style: TextStyle(
-                      fontFamily: 'MontserratAlternates',
-                      fontSize: 40.0,
-                      color: Colors.blueAccent,
-                    ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Distance Traveled",
+                        style: TextStyle(
+                          fontFamily: 'MontserratBlack',
+                          fontSize: 20.0,
+                          color: Colors.blueAccent,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 1,
+                            child: Stack(
+                              children: [
+                                Container(
+                                  margin: const EdgeInsets.symmetric(
+                                    vertical: 25.0,
+                                    horizontal: 25.0,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.lightBlue[50],
+                                    borderRadius: BorderRadius.circular(15),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color:
+                                            Colors.blueGrey.withOpacity(0.15),
+                                        spreadRadius: 1,
+                                        blurRadius: 3,
+                                        offset: Offset(
+                                            0, 3), // changes position of shadow
+                                      ),
+                                    ],
+                                  ),
+                                  height: 150.0,
+                                  width: 150.0,
+                                ),
+                                Positioned(
+                                  top: 35,
+                                  left: 35,
+                                  child: const Text(
+                                    "Today",
+                                    style: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      fontSize: 20.0,
+                                      color: Colors.blueAccent,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 85,
+                                  left: 35,
+                                  child: Text(
+                                    "${widget.accelerometer.totalDayDistance.toString()} km",
+                                    style: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      fontSize: 30.0,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Stack(
+                              children: [
+                                Container(
+                                  margin: const EdgeInsets.symmetric(
+                                    vertical: 25.0,
+                                    horizontal: 25.0,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.lightBlue[50],
+                                    borderRadius: BorderRadius.circular(15),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color:
+                                            Colors.blueGrey.withOpacity(0.15),
+                                        spreadRadius: 1,
+                                        blurRadius: 3,
+                                        offset: Offset(
+                                            0, 3), // changes position of shadow
+                                      ),
+                                    ],
+                                  ),
+                                  height: 150.0,
+                                  width: 150.0,
+                                ),
+                                Positioned(
+                                  top: 35,
+                                  left: 35,
+                                  child: const Text(
+                                    "Total",
+                                    style: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      fontSize: 20.0,
+                                      color: Colors.blueAccent,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      /*DropdownButton(
+                    items: Constants.menuItems,
+                    value: chosenStamp,
+                    onChanged: con.nothing,
+                    hint: const Text('Time Intervals'),
+                  )*/
+                    ],
                   ),
-                  /*DropdownButton(
-                items: Constants.menuItems,
-                value: chosenStamp,
-                onChanged: con.nothing,
-                hint: const Text('Time Intervals'),
-              )*/
-                ],
+                ),
               ),
             ),
           ),

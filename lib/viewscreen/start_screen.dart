@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_health_app/Model/accelerometer.dart';
+import 'package:mobile_health_app/model/accelerometer.dart';
 import 'package:mobile_health_app/controller/firestore_controller.dart';
 import 'package:mobile_health_app/viewscreen/view_util.dart';
 
@@ -226,6 +227,8 @@ class _Controller {
   String? email;
   String? password;
 
+  Accelerometer newAccel = Accelerometer();
+
   Future<void> signIn() async {
     FormState? currentState = state.formKey.currentState;
     if (currentState == null) return;
@@ -237,11 +240,14 @@ class _Controller {
         email: email!,
         password: password!,
       );
+
+      Accelerometer accel = await FirestoreController.getUser(email: email!);
       await Navigator.pushNamed(
         state.context,
         HomeScreen.routeName,
         arguments: {
           ARGS.USER: user,
+          ARGS.ACCELEROMETER: accel,
         },
       );
     } catch (e) {
@@ -262,9 +268,14 @@ class _Controller {
         password: password!,
       );
 
-      Accelerometer userprof = Accelerometer.set(email!.trim());
-      FirestoreController.addUser(userProf: userprof);
-
+      //Accelerometer userprof = Accelerometer.set(email!.trim());
+      newAccel.email = email!.trim();
+      newAccel.distanceRecords = []; //keeps track of distance traveled for day
+      newAccel.dataPoints=[];
+      newAccel.totalDayDistance = 0;
+      newAccel.totalDistance = 0;
+      newAccel.uid = FirebaseAuth.instance.currentUser?.uid;
+      FirestoreController.addUser(userProf: newAccel);
       showSnackBar(
         context: state.context,
         message: 'Account created!',

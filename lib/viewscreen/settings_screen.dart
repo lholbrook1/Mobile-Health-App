@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_health_app/Model/accelerometer.dart';
-import 'package:mobile_health_app/Model/constant.dart';
+import 'package:mobile_health_app/model/accelerometer.dart';
+import 'package:mobile_health_app/model/constant.dart';
 import 'package:mobile_health_app/controller/firestore_controller.dart';
 
 class SettingsScreen extends StatefulWidget {

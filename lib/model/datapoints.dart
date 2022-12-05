@@ -47,7 +47,7 @@ class DataPoints {
     var pointsList = <DataPoints>[];
     final rawData =
         // ignore: unnecessary_string_escapes
-        await rootBundle.loadString("lib/viewscreen/datapoints.csv");
+        await rootBundle.loadString("lib/model/datapoints.csv");
     List<List<dynamic>> _rawList = const CsvToListConverter().convert(rawData);
     for (var rowInfo in _rawList) {
       var oneDataPoint = DataPoints(
