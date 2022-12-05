@@ -1,16 +1,18 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_health_app/Model/accelerometer.dart';
-import 'package:mobile_health_app/Model/constant.dart';
-import 'package:mobile_health_app/controller/firestore_controller.dart';
+import '../controller/firestore_controller.dart';
+import '../model/accelerometer.dart';
+import '../model/constant.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
     required this.user,
+    required this.accelerometer,
     Key? key,
   }) : super(key: key);
-  final User user;
 
+  final User user;
+  final Accelerometer accelerometer;
   static const routeName = '/settingsScreen';
 
   @override
@@ -21,7 +23,8 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsState extends State<SettingsScreen> {
   late _Controller con;
-  late String interval;
+  String interval = "60";
+  String dataSend = '60';
   late String email;
 
   @override
@@ -31,9 +34,7 @@ class _SettingsState extends State<SettingsScreen> {
     email = widget.user.email ?? 'No email';
   }
 
-  void render(fn) {
-    setState(fn);
-  }
+  void render(fn) => setState(fn);
 
   @override
   Widget build(BuildContext context) {
@@ -43,25 +44,44 @@ class _SettingsState extends State<SettingsScreen> {
       ),
       body: Container(
         color: Colors.white,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Text(
-              "Set collection interval",
-              style: TextStyle(
-                fontFamily: 'MontserratAlternates',
-                fontSize: 20.0,
-                color: Colors.blueAccent,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Text(
+                "Set data collection interval",
+                style: TextStyle(
+                  fontFamily: 'MontserratAlternates',
+                  fontSize: 20.0,
+                  color: Colors.blueAccent,
+                ),
               ),
-            ),
-            DropdownButton(
-              items: Constants.menuItems,
-              value: interval,
-              onChanged: con.changeInterval,
-              hint: const Text('Timestamps'),
-            )
-          ],
+              DropdownButton(
+                items: Constants.collectMenuItems,
+                value: interval,
+                onChanged: con.changeCollectionInterval,
+                hint: const Text('Timestamps'),
+              ),
+              Divider(
+                height: 100,
+              ),
+              const Text(
+                "Set data transmission interval",
+                style: TextStyle(
+                  fontFamily: 'MontserratAlternates',
+                  fontSize: 20.0,
+                  color: Colors.blueAccent,
+                ),
+              ),
+              DropdownButton(
+                items: Constants.sendMenuItems,
+                value: interval,
+                onChanged: con.changeSendInterval,
+                hint: const Text('Timestamps'),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -72,12 +92,17 @@ class _Controller {
   _SettingsState state;
   _Controller(this.state);
 
-  void changeInterval(String? value) {
-    Accelerometer myProfile =
-        FirestoreController.getUser(email: state.widget.user.email!)
-            as Accelerometer;
+  void changeCollectionInterval(String? value) {
     if (value != null) {
-      myProfile.setCollectionInterval(value);
+      state.widget.accelerometer.setCollectionInterval(value);
+      state.interval = value;
+      state.render(() {});
+    }
+  }
+
+  void changeSendInterval(String? value) {
+    if (value != null) {
+      state.widget.accelerometer.setSendInterval(value);
       state.interval = value;
       state.render(() {});
     }

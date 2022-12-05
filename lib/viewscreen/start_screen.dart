@@ -1,12 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_health_app/Model/accelerometer.dart';
-import 'package:mobile_health_app/controller/firestore_controller.dart';
-import 'package:mobile_health_app/viewscreen/view_util.dart';
 
 import '../controller/auth_controller.dart';
+import '../controller/firestore_controller.dart';
+import '../model/accelerometer.dart';
 import '../model/constant.dart';
+import '../model/datapoints.dart';
 import 'home_screen.dart';
+import 'view_util.dart';
 
 class StartScreen extends StatefulWidget {
   const StartScreen({Key? key}) : super(key: key);
@@ -27,6 +29,8 @@ class _StartState extends State<StartScreen> {
   void initState() {
     super.initState();
     con = _Controller(this);
+    con.getDataTest();
+    print(con.pointsList.length);
   }
 
   @override
@@ -225,6 +229,9 @@ class _Controller {
   _Controller(this.state);
   String? email;
   String? password;
+  List<DataPoints> pointsList = [];
+
+  Accelerometer newAccel = Accelerometer();
 
   Future<void> signIn() async {
     FormState? currentState = state.formKey.currentState;
@@ -237,11 +244,17 @@ class _Controller {
         email: email!,
         password: password!,
       );
+
+      Accelerometer accel = await FirestoreController.getUser(email: email!);
+      getDataTest();
+
       await Navigator.pushNamed(
         state.context,
         HomeScreen.routeName,
         arguments: {
           ARGS.USER: user,
+          ARGS.ACCELEROMETER: accel,
+          ARGS.DATABASE: pointsList,
         },
       );
     } catch (e) {
@@ -262,9 +275,14 @@ class _Controller {
         password: password!,
       );
 
-      Accelerometer userprof = Accelerometer.set(email!.trim());
-      FirestoreController.addUser(userProf: userprof);
-
+      //Accelerometer userprof = Accelerometer.set(email!.trim());
+      newAccel.email = email!.trim();
+      newAccel.distanceRecords = []; //keeps track of distance traveled for day
+      newAccel.dataPoints = [];
+      newAccel.totalDayDistance = 0;
+      newAccel.totalDistance = 0;
+      newAccel.uid = FirebaseAuth.instance.currentUser?.uid;
+      FirestoreController.addUser(userProf: newAccel);
       showSnackBar(
         context: state.context,
         message: 'Account created!',
@@ -304,6 +322,16 @@ class _Controller {
       return 'Password too short';
     } else {
       return null;
+    }
+  }
+
+  void getDataTest() async {
+    try {
+      Future<List<DataPoints>> getPointsList =
+          DataPoints.getDataPointsDatabase();
+      pointsList = await getPointsList;
+    } catch (e) {
+      if (Constants.devMode) print('===== failed to getdata: $e');
     }
   }
 }

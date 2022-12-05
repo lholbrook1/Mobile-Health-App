@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../Model/constant.dart';
-import '../Model/accelerometer.dart';
+import '../model/constant.dart';
+import '../model/accelerometer.dart';
 
 class FirestoreController {
   static addUser({
@@ -9,7 +9,7 @@ class FirestoreController {
   }) async {
     try {
       DocumentReference ref = await FirebaseFirestore.instance
-          .collection(Constants.Accelerometer)
+          .collection(Constants.accelerometerCollection)
           .add(userProf.toFirestoreDoc());
       return ref.id; // doc id auto-generated.
     } catch (e) {
@@ -17,11 +17,19 @@ class FirestoreController {
     }
   }
 
+    static Future<void> updateUser(
+      {required String docId, required Map<String, dynamic> updateInfo}) async {
+    await FirebaseFirestore.instance
+        .collection(Constants.accelerometerCollection)
+        .doc(docId)
+        .update(updateInfo);
+  }
+
   static Future<Accelerometer> getUser({
     required String email,
   }) async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection(Constants.Accelerometer)
+        .collection(Constants.accelerometerCollection)
         .where(DocKeyAccelerometer.email.name, isEqualTo: email)
         .get();
 

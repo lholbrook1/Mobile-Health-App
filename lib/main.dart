@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:mobile_health_app/viewscreen/start_screen.dart';
+import 'package:mobile_health_app/viewscreen/timestamps_screen.dart';
 import 'firebase_options.dart';
 import 'model/constant.dart';
 import 'viewscreen/home_screen.dart';
@@ -67,31 +68,52 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return MaterialApp(
-      initialRoute: StartScreen.routeName,
-      routes: {
-        StartScreen.routeName: (context) => const StartScreen(),
-        HomeScreen.routeName: (context) {
-          Object? args = ModalRoute.of(context)?.settings.arguments;
-          if (args == null) {
-            showSnackBar(
-                context: context, message: 'args is null for Home Screen');
-          }
-          var arguments = args as Map;
-          var user = arguments[ARGS.USER];
-          return HomeScreen(user: user);
-        },
-        SettingsScreen.routeName: (context) {
-          Object? args = ModalRoute.of(context)?.settings.arguments;
-          if (args == null) {
-            showSnackBar(
-                context: context, message: 'args is null for Home Screen');
-          }
-          var arguments = args as Map;
-          var user = arguments[ARGS.USER];
-          return SettingsScreen(user: user);
+    return MaterialApp(initialRoute: StartScreen.routeName, routes: {
+      StartScreen.routeName: (context) => const StartScreen(),
+      HomeScreen.routeName: (context) {
+        Object? args = ModalRoute.of(context)?.settings.arguments;
+        if (args == null) {
+          showSnackBar(
+              context: context, message: 'args is null for Home Screen');
         }
+        var arguments = args as Map;
+        var user = arguments[ARGS.USER];
+        var accelerometer = arguments[ARGS.ACCELEROMETER];
+        var database = arguments[ARGS.DATABASE];
+        return HomeScreen(
+          user: user,
+          accelerometer: accelerometer,
+          database: database,
+        );
       },
-    );
+      SettingsScreen.routeName: (context) {
+        Object? args = ModalRoute.of(context)?.settings.arguments;
+        if (args == null) {
+          showSnackBar(
+              context: context, message: 'args is null for Settings Screen');
+        }
+        var arguments = args as Map;
+        var user = arguments[ARGS.USER];
+        var accelerometer = arguments[ARGS.ACCELEROMETER];
+        return SettingsScreen(
+          user: user,
+          accelerometer: accelerometer,
+        );
+      },
+      TimeStampsScreen.routeName: (context) {
+        Object? args = ModalRoute.of(context)?.settings.arguments;
+        if (args == null) {
+          showSnackBar(
+              context: context, message: 'args is null for Time Stamps Screen');
+        }
+        var arguments = args as Map;
+        var user = arguments[ARGS.USER];
+        var accelerometer = arguments[ARGS.ACCELEROMETER];
+        return TimeStampsScreen(
+          user: user,
+          accelerometer: accelerometer,
+        );
+      },
+    });
   }
 }
