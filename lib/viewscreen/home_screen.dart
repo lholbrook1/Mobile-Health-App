@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_health_app/controller/firestore_controller.dart';
+import '../controller/firestore_controller.dart';
 import '../model/accelerometer.dart';
 import '../model/constant.dart';
 import 'settings_screen.dart';
@@ -132,7 +132,7 @@ class _HomeState extends State<HomeScreen> {
                                 ),
                                 Positioned(
                                   top: 85,
-                                  left: 35,
+                                  left: 40,
                                   child: Text(
                                     "${widget.accelerometer.totalDayDistance.toString()} km",
                                     style: TextStyle(
@@ -180,6 +180,18 @@ class _HomeState extends State<HomeScreen> {
                                       fontFamily: 'Montserrat',
                                       fontSize: 20.0,
                                       color: Colors.blueAccent,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 85,
+                                  left: 40,
+                                  child: Text(
+                                    "${widget.accelerometer.totalDistance.toString()} km",
+                                    style: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      fontSize: 30.0,
+                                      color: Colors.black,
                                     ),
                                   ),
                                 ),

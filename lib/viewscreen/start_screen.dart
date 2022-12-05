@@ -1,13 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_health_app/model/accelerometer.dart';
-import 'package:mobile_health_app/controller/firestore_controller.dart';
-import 'package:mobile_health_app/viewscreen/view_util.dart';
 
 import '../controller/auth_controller.dart';
+import '../controller/firestore_controller.dart';
+import '../model/accelerometer.dart';
 import '../model/constant.dart';
 import 'home_screen.dart';
+import 'view_util.dart';
 
 class StartScreen extends StatefulWidget {
   const StartScreen({Key? key}) : super(key: key);
