@@ -9,8 +9,8 @@ class SettingsScreen extends StatefulWidget {
     required this.user,
     Key? key,
   }) : super(key: key);
-  final User user;
 
+  final User user;
   static const routeName = '/settingsScreen';
 
   @override
@@ -21,7 +21,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsState extends State<SettingsScreen> {
   late _Controller con;
-  late String interval;
+  String interval = "60";
   late String email;
 
   @override
@@ -31,9 +31,7 @@ class _SettingsState extends State<SettingsScreen> {
     email = widget.user.email ?? 'No email';
   }
 
-  void render(fn) {
-    setState(fn);
-  }
+  void render(fn) => setState(fn);
 
   @override
   Widget build(BuildContext context) {
@@ -43,25 +41,27 @@ class _SettingsState extends State<SettingsScreen> {
       ),
       body: Container(
         color: Colors.white,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Text(
-              "Set collection interval",
-              style: TextStyle(
-                fontFamily: 'MontserratAlternates',
-                fontSize: 20.0,
-                color: Colors.blueAccent,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Text(
+                "Set collection interval",
+                style: TextStyle(
+                  fontFamily: 'MontserratAlternates',
+                  fontSize: 20.0,
+                  color: Colors.blueAccent,
+                ),
               ),
-            ),
-            DropdownButton(
-              items: Constants.menuItems,
-              value: interval,
-              onChanged: con.changeInterval,
-              hint: const Text('Timestamps'),
-            )
-          ],
+              DropdownButton(
+                items: Constants.menuItems,
+                value: interval,
+                onChanged: con.changeInterval,
+                hint: const Text('Timestamps'),
+              )
+            ],
+          ),
         ),
       ),
     );

@@ -85,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Object? args = ModalRoute.of(context)?.settings.arguments;
           if (args == null) {
             showSnackBar(
-                context: context, message: 'args is null for Home Screen');
+                context: context, message: 'args is null for Settings Screen');
           }
           var arguments = args as Map;
           var user = arguments[ARGS.USER];

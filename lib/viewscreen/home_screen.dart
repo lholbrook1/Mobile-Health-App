@@ -1,10 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_health_app/Model/accelerometer.dart';
-import 'package:mobile_health_app/Model/datapoinst.dart';
 import 'package:mobile_health_app/controller/firestore_controller.dart';
-import 'package:mobile_health_app/viewscreen/view_util.dart';
-import '../Model/constant.dart';
+import '../model/constant.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -12,8 +10,8 @@ class HomeScreen extends StatefulWidget {
     required this.user,
     Key? key,
   }) : super(key: key);
-  final User user;
 
+  final User user;
   static const routeName = '/homeScreen';
 
   @override
@@ -135,23 +133,13 @@ class _Controller {
   }*/
 
   void settingsPage() async {
-    try {
-      await Navigator.pushNamed(
-        state.context,
-        SettingsScreen.routeName,
-        arguments: {
-          ARGS.USER: state.widget.user,
-        },
-      );
-      Navigator.of(state.context).pop(); // push in drawer
-    } catch (e) {
-      if (Constants.devMode)
-        print('======== Settings screen navigation error: $e');
-      showSnackBar(
-        context: state.context,
-        seconds: 20,
-        message: 'Settings screen navigation error: $e',
-      );
-    }
+    await Navigator.pushNamed(
+      state.context,
+      SettingsScreen.routeName,
+      arguments: {
+        ARGS.USER: state.widget.user,
+      },
+    );
+    Navigator.of(state.context).pop(); // push in drawer
   }
 }
