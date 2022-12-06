@@ -23,6 +23,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsState extends State<SettingsScreen> {
   late _Controller con;
   String interval = "60";
+  String dataSend = '60';
   late String email;
 
   @override
@@ -47,6 +48,23 @@ class _SettingsState extends State<SettingsScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              const Text(
+                "Set collection interval",
+                style: TextStyle(
+                  fontFamily: 'MontserratAlternates',
+                  fontSize: 20.0,
+                  color: Colors.blueAccent,
+                ),
+              ),
+              DropdownButton(
+                items: Constants.menuItems,
+                value: interval,
+                onChanged: con.changeInterval,
+                hint: const Text('Timestamps'),
+              ),
+              Divider(
+                height: 100,
+              ),
               const Text(
                 "Set collection interval",
                 style: TextStyle(
