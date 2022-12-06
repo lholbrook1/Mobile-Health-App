@@ -55,7 +55,7 @@ class DataPoints {
         yValue: rowInfo[1].toString(),
         timestamp: DateTime.fromMillisecondsSinceEpoch(rowInfo[3].toInt()),
       );
-      print(oneDataPoint.timestamp);
+      //print(oneDataPoint.timestamp);
       pointsList.add(oneDataPoint);
     }
     return pointsList;
