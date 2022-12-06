@@ -242,6 +242,7 @@ class _Controller {
       );
 
       Accelerometer accel = await FirestoreController.getUser(email: email!);
+      
       await Navigator.pushNamed(
         state.context,
         HomeScreen.routeName,
