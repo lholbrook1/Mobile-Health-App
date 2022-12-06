@@ -332,6 +332,7 @@ class _Controller {
       SettingsScreen.routeName,
       arguments: {
         ARGS.USER: state.widget.user,
+        ARGS.ACCELEROMETER: state.widget.accelerometer,
       },
     );
     Navigator.of(state.context).pop(); // push in drawer

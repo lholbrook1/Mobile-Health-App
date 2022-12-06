@@ -1,7 +1,11 @@
+import 'package:flutter/cupertino.dart';
+import 'package:mobile_health_app/controller/firestore_controller.dart';
+
 enum DocKeyAccelerometer {
   uid,
   email,
   collectionInterval,
+  sendInterval,
   dataPoints,
   distanceRecords,
   totalDayDistance,
@@ -22,6 +26,7 @@ class Accelerometer {
   String? email;
   late List<dynamic> dataPoints;
   String? collectionInterval;
+  String? sendInterval;
   late List<double> distanceRecords;
   late double totalDayDistance;
   late double totalDistance;
@@ -31,6 +36,7 @@ class Accelerometer {
     this.docId,
     this.email = '',
     this.collectionInterval = '60',
+    this.sendInterval = '60',
     this.totalDayDistance = 0,
     this.totalDistance = 0,
     List<dynamic>? dataPoints,
@@ -44,6 +50,7 @@ class Accelerometer {
     this.uid;
     this.docId;
     this.collectionInterval;
+    this.sendInterval;
     this.totalDayDistance;
     this.totalDistance;
     dataPoints = [];
@@ -55,6 +62,7 @@ class Accelerometer {
     docId = p.docId;
     email = p.email;
     collectionInterval = p.collectionInterval;
+    sendInterval = p.sendInterval;
     distanceRecords = distanceRecords == null ? [] : [...distanceRecords];
     totalDayDistance = p.totalDayDistance;
     totalDistance = p.totalDistance;
@@ -67,6 +75,7 @@ class Accelerometer {
     docId = p.docId;
     email = p.email;
     collectionInterval = p.collectionInterval;
+    sendInterval = p.sendInterval;
     totalDayDistance = p.totalDayDistance;
     totalDistance = p.totalDistance;
     dataPoints.clear();
@@ -81,6 +90,7 @@ class Accelerometer {
       DocKeyAccelerometer.email.name: email,
       DocKeyAccelerometer.uid.name: uid,
       DocKeyAccelerometer.collectionInterval.name: collectionInterval,
+      DocKeyAccelerometer.sendInterval.name: sendInterval,
       DocKeyAccelerometer.dataPoints.name: dataPoints,
       DocKeyAccelerometer.distanceRecords.name: distanceRecords,
       DocKeyAccelerometer.totalDayDistance.name: totalDayDistance,
@@ -97,6 +107,7 @@ class Accelerometer {
       email: doc[DocKeyAccelerometer.email.name] ??= 'N/A',
       collectionInterval:
           doc[DocKeyAccelerometer.collectionInterval.toString()] ??= '60',
+      sendInterval: doc[DocKeyAccelerometer.sendInterval.toString()] ??= '60',
       dataPoints: doc[DocKeyAccelerometer.dataPoints.name] ??= [],
       distanceRecords: doc[DocKeyAccelerometer.distanceRecords.name] ??= [],
       totalDayDistance: doc[DocKeyAccelerometer.totalDayDistance.name] ??= 0,
@@ -106,5 +117,17 @@ class Accelerometer {
 
   void setCollectionInterval(String x) {
     this.collectionInterval = x;
+    Map<String, dynamic> info = {
+      DocKeyAccelerometer.collectionInterval.name: collectionInterval,
+    };
+    FirestoreController.updateUser(docId: docId!, updateInfo: info);
+  }
+
+  void setSendInterval(String x) {
+    this.sendInterval = x;
+    Map<String, dynamic> info = {
+      DocKeyAccelerometer.sendInterval.name: sendInterval,
+    };
+    FirestoreController.updateUser(docId: docId!, updateInfo: info);
   }
 }

@@ -5,6 +5,7 @@ class Constants {
   static const accelerometerCollection = 'accelerometer';
 
   static const List<DropdownMenuItem<String>> menuItems = [
+    DropdownMenuItem(value: '10', child: Text('Test/Demo')),
     DropdownMenuItem(value: '15', child: Text('15 minutes')),
     DropdownMenuItem(value: '30', child: Text('30 minutes')),
     DropdownMenuItem(value: '60', child: Text('1 hour')),
