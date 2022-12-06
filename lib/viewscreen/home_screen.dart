@@ -9,6 +9,7 @@ import '../model/constant.dart';
 import '../model/datapoints.dart';
 import 'settings_screen.dart';
 import 'dart:math';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -29,6 +30,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeState extends State<HomeScreen> {
   late _Controller con;
+  bool run = false;
   late String email;
   late List<dynamic> userPoints;
   late Accelerometer myProfile =
@@ -103,12 +105,27 @@ class _HomeState extends State<HomeScreen> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(11.0),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              con.getDataTest();
-                              con._startTimer();
-                            },
-                            child: const Text("Start Run"),
+                          child: Row(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                      con.getDataTest();
+                                      con._startTimer();
+                                      run = true;
+                                  },
+                                  child: const Text("Start Run"),
+                                ),
+                              ),
+                               ElevatedButton(
+                                onPressed: () {
+                                    con._timer.cancel();
+                                    run = false;
+                                },
+                                child: const Text("End Run"),
+                              ),
+                            ],
                           ),
                         ),
                         const Text(
@@ -275,33 +292,36 @@ class _HomeState extends State<HomeScreen> {
                         //Listview builder for entries from datapoints
                         ListView.builder(
                             shrinkWrap: true,
+                            physics: ClampingScrollPhysics(),
                             itemCount:
-                                3, //not sure how many datapoints we're getting per user
+                                (userPoints.length > 1) ? userPoints.length : 0,
                             itemBuilder: (BuildContext context, int index) {
-                              return Card(
-                                child: ListTile(
-                                  leading: Icon(
-                                    Icons.run_circle_outlined,
-                                    color: Colors.blueAccent,
-                                    size: 50,
-                                  ),
-                                  title: Text(
-                                    'From (time) to (time)',
-                                    style: const TextStyle(
-                                      fontFamily: 'Montserrat',
-                                      fontSize: 10.0,
-                                      color: Colors.blueAccent,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    'You walked (km) km!',
-                                    style: const TextStyle(
-                                      fontFamily: 'Montserrat',
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-                              );
+                              return (index + 1 < userPoints.length)
+                                  ? Card(
+                                      child: ListTile(
+                                        leading: Icon(
+                                          Icons.run_circle_outlined,
+                                          color: Colors.blueAccent,
+                                          size: 50,
+                                        ),
+                                        title: Text(
+                                          'From ${DateTime.parse(userPoints[index]['t'].toDate().toString())} to ${DateTime.parse(userPoints[index + 1]['t'].toDate().toString())}',
+                                          style: const TextStyle(
+                                            fontFamily: 'Montserrat',
+                                            fontSize: 10.0,
+                                            color: Colors.blueAccent,
+                                          ),
+                                        ),
+                                        subtitle: Text(
+                                          'You walked (km) km!',
+                                          style: const TextStyle(
+                                            fontFamily: 'Montserrat',
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  : Text("");
                             })
                       ],
                     ),
@@ -324,7 +344,6 @@ class _Controller {
   int randNum = Random().nextInt(6700); //starts at random point of data
   Map<int, Map<String, dynamic>> tempPoints = {};
 
-
   void getDataTest() async {
     try {
       Future<List<DataPoints>> getPointsList =
@@ -340,23 +359,27 @@ class _Controller {
       _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
         int index = 1;
         //after 5 seconds
-
-        print(pointsList[randNum].xValue);
-        print(pointsList[randNum].yValue);
-
-        tempPoints[index] = {'x' : pointsList[randNum].xValue, 'y' : pointsList[randNum].yValue, "t" : DateTime.now()};
+        tempPoints[index] = {
+          'x': pointsList[randNum].xValue,
+          'y': pointsList[randNum].yValue,
+          "t": DateTime.now()
+        };
         state.userPoints.add(tempPoints[index]);
 
         randNum++;
         index++;
 
-        //send to firebase after certain number of datapoints
         //this example just has it so every two datapoints are stored, its sent to the cloud
         if (state.userPoints.length % 2 == 0) {
           Map<String, dynamic> updateInfo = {};
           updateInfo[Accelerometer.DATAPOINTS] = state.userPoints;
           await FirestoreController.updateUser(
-            docId: state.widget.accelerometer.docId!, updateInfo: updateInfo);
+              docId: state.widget.accelerometer.docId!, updateInfo: updateInfo);
+          Accelerometer updateAccel =
+              await FirestoreController.getUser(email: state.email);
+          state.render(() {
+            state.userPoints = updateAccel.dataPoints;
+          });
         }
       });
     } catch (e) {
