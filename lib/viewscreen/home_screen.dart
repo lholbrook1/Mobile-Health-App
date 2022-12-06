@@ -252,12 +252,6 @@ class _HomeState extends State<HomeScreen> {
                           height: 100.0,
                           width: 350.0,
                         ),
-                        /*DropdownButton(
-                      items: Constants.menuItems,
-                      value: chosenStamp,
-                      onChanged: con.nothing,
-                      hint: const Text('Time Intervals'),
-                    )*/
                         const Text(
                           "Steps",
                           style: TextStyle(
@@ -317,8 +311,7 @@ class _Controller {
   late List<DataPoints> pointsList;
   int randNum = Random().nextInt(6700); //starts at random point of data
   List<dynamic> userPoints = [];
-          Map<int, Map<String, dynamic>> tempPoints = {};
-
+  Map<int, Map<String, dynamic>> tempPoints = {};
 
   void getDataTest() async {
     try {
@@ -339,7 +332,11 @@ class _Controller {
         print(pointsList[randNum].xValue);
         print(pointsList[randNum].yValue);
 
-        tempPoints[index] = {'x' : pointsList[randNum].xValue, 'y' : pointsList[randNum].yValue, "t" : DateTime.now()};
+        tempPoints[index] = {
+          'x': pointsList[randNum].xValue,
+          'y': pointsList[randNum].yValue,
+          "t": DateTime.now()
+        };
         userPoints.add(tempPoints[index]);
 
         randNum++;
@@ -351,42 +348,13 @@ class _Controller {
           Map<String, dynamic> updateInfo = {};
           updateInfo[Accelerometer.DATAPOINTS] = userPoints;
           await FirestoreController.updateUser(
-            docId: state.widget.accelerometer.docId!, updateInfo: updateInfo);
+              docId: state.widget.accelerometer.docId!, updateInfo: updateInfo);
         }
       });
     } catch (e) {
       if (Constants.devMode) print('===== failed to startTimer: $e');
     }
   }
-
-  /*void populateDataPoints() async {
-    if (state.dataCSVDatabase.isEmpty) {
-      state.dataCSVDatabase = await DataPoints.getDataPointsDatabase();
-    }
-  }*/
-
-  /*List<DropdownMenuItem<String>>? getTimestamps() {
-    //populateDataPoints();
-    var timeStampset = <DropdownMenuItem<String>>[];
-    state.dataCSVDatabase.forEach(point) {
-      timeStampset.add(DropdownMenuItem(
-        value: point.timestamp.toString(),
-        child: Text(point.timestamp.toString()),
-      ));
-    }
-
-    //timeStampset = ({...timeStampset}.toList());
-    //timeStampset.sort((b, a) => a.compareTo(b));
-
-    return timeStampset;
-  }*/
-
-  /*void nothing(String? value) {
-    if (value != null) {
-      state.chosenStamp = value;
-      state.render(() {});
-    }
-  }*/
 
   void settingsPage() async {
     await Navigator.pushNamed(
