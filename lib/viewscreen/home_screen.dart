@@ -1,9 +1,14 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../controller/firestore_controller.dart';
 import '../model/accelerometer.dart';
 import '../model/constant.dart';
+import '../model/datapoints.dart';
 import 'settings_screen.dart';
+import 'dart:math';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -90,6 +95,16 @@ class _HomeState extends State<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        Padding(
+                          padding: const EdgeInsets.all(11.0),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              con.getDataTest();
+                              con._startTimer();
+                            },
+                            child: const Text("Start Run"),
+                          ),
+                        ),
                         const Text(
                           "Distance Traveled",
                           style: TextStyle(
@@ -229,8 +244,8 @@ class _HomeState extends State<HomeScreen> {
                                 color: Colors.blueGrey.withOpacity(0.15),
                                 spreadRadius: 1,
                                 blurRadius: 3,
-                                offset:
-                                    Offset(0, 3), // changes position of shadow
+                                offset: const Offset(
+                                    0, 3), // changes position of shadow
                               ),
                             ],
                           ),
@@ -296,6 +311,53 @@ class _HomeState extends State<HomeScreen> {
 class _Controller {
   _HomeState state;
   _Controller(this.state);
+  DataPoints newPoint = DataPoints();
+
+  late Timer _timer;
+  late List<DataPoints> pointsList;
+  int randNum = Random().nextInt(6700); //starts at random point of data
+  List<dynamic> userPoints = [];
+          Map<int, Map<String, dynamic>> tempPoints = {};
+
+
+  void getDataTest() async {
+    try {
+      Future<List<DataPoints>> getPointsList =
+          DataPoints.getDataPointsDatabase();
+      pointsList = await getPointsList;
+    } catch (e) {
+      if (Constants.devMode) print('===== failed to getdata: $e');
+    }
+  }
+
+  void _startTimer() {
+    try {
+      _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
+        int index = 1;
+        //after 5 seconds
+
+        print(pointsList[randNum].xValue);
+        print(pointsList[randNum].yValue);
+
+        tempPoints[index] = {'x' : pointsList[randNum].xValue, 'y' : pointsList[randNum].yValue, "t" : DateTime.now()};
+        userPoints.add(tempPoints[index]);
+
+        randNum++;
+        index++;
+
+        //send to firebase after certain number of datapoints
+        //this example just has it so every two datapoints are stored, its sent to the cloud
+        if (userPoints.length % 2 == 0) {
+          Map<String, dynamic> updateInfo = {};
+          updateInfo[Accelerometer.DATAPOINTS] = userPoints;
+          await FirestoreController.updateUser(
+            docId: state.widget.accelerometer.docId!, updateInfo: updateInfo);
+        }
+      });
+    } catch (e) {
+      if (Constants.devMode) print('===== failed to startTimer: $e');
+    }
+  }
 
   /*void populateDataPoints() async {
     if (state.dataCSVDatabase.isEmpty) {
