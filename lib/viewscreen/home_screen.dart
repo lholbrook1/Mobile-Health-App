@@ -48,7 +48,14 @@ class _HomeState extends State<HomeScreen> {
         onWillPop: () => Future.value(false),
         child: Scaffold(
           appBar: AppBar(
-            title: Text("$email's feed"),
+            centerTitle: true,
+            title: const Text(
+              "Your Progress",
+              style: TextStyle(
+                fontFamily: 'MontserratBlack',
+                fontSize: 20.0,
+              ),
+            ),
           ),
           //        DRAWER      --------------------------------------------------
           drawer: Drawer(
@@ -60,7 +67,7 @@ class _HomeState extends State<HomeScreen> {
                     Icons.person,
                     size: 70.0,
                   ),
-                  accountName: const Text('no profile'),
+                  accountName: const Text('User'),
                   accountEmail: Text(email),
                 ),
                 ListTile(
@@ -78,135 +85,205 @@ class _HomeState extends State<HomeScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Text(
-                        "Distance Traveled",
-                        style: TextStyle(
-                          fontFamily: 'MontserratBlack',
-                          fontSize: 20.0,
-                          color: Colors.blueAccent,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "Distance Traveled",
+                          style: TextStyle(
+                            fontFamily: 'MontserratBlack',
+                            fontSize: 20.0,
+                            color: Colors.blueAccent,
+                          ),
                         ),
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 1,
-                            child: Stack(
-                              children: [
-                                Container(
-                                  margin: const EdgeInsets.symmetric(
-                                    vertical: 25.0,
-                                    horizontal: 25.0,
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    margin: const EdgeInsets.symmetric(
+                                      vertical: 25.0,
+                                      horizontal: 25.0,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.lightBlue[50],
+                                      borderRadius: BorderRadius.circular(15),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color:
+                                              Colors.blueGrey.withOpacity(0.15),
+                                          spreadRadius: 1,
+                                          blurRadius: 3,
+                                          offset: Offset(0,
+                                              3), // changes position of shadow
+                                        ),
+                                      ],
+                                    ),
+                                    height: 150.0,
+                                    width: 150.0,
                                   ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.lightBlue[50],
-                                    borderRadius: BorderRadius.circular(15),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color:
-                                            Colors.blueGrey.withOpacity(0.15),
-                                        spreadRadius: 1,
-                                        blurRadius: 3,
-                                        offset: Offset(
-                                            0, 3), // changes position of shadow
+                                  const Positioned(
+                                    top: 35,
+                                    left: 35,
+                                    child: Text(
+                                      "Today",
+                                      style: TextStyle(
+                                        fontFamily: 'Montserrat',
+                                        fontSize: 20.0,
+                                        color: Colors.blueAccent,
                                       ),
-                                    ],
+                                    ),
                                   ),
-                                  height: 150.0,
-                                  width: 150.0,
-                                ),
-                                Positioned(
-                                  top: 35,
-                                  left: 35,
-                                  child: const Text(
-                                    "Today",
-                                    style: TextStyle(
+                                  Positioned(
+                                    top: 85,
+                                    left: 40,
+                                    child: Text(
+                                      "${widget.accelerometer.totalDayDistance.toString()} km",
+                                      style: const TextStyle(
+                                        fontFamily: 'Montserrat',
+                                        fontSize: 30.0,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    margin: const EdgeInsets.symmetric(
+                                      vertical: 25.0,
+                                      horizontal: 25.0,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.lightBlue[50],
+                                      borderRadius: BorderRadius.circular(15),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color:
+                                              Colors.blueGrey.withOpacity(0.15),
+                                          spreadRadius: 1,
+                                          blurRadius: 3,
+                                          offset: const Offset(0,
+                                              3), // changes position of shadow
+                                        ),
+                                      ],
+                                    ),
+                                    height: 150.0,
+                                    width: 150.0,
+                                  ),
+                                  const Positioned(
+                                    top: 35,
+                                    left: 35,
+                                    child: Text(
+                                      "Total",
+                                      style: TextStyle(
+                                        fontFamily: 'Montserrat',
+                                        fontSize: 20.0,
+                                        color: Colors.blueAccent,
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 85,
+                                    left: 40,
+                                    child: Text(
+                                      "${widget.accelerometer.totalDistance.toString()} km",
+                                      style: const TextStyle(
+                                        fontFamily: 'Montserrat',
+                                        fontSize: 30.0,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Text(
+                          "Activity Review (Day/Week/Month)",
+                          style: TextStyle(
+                            fontFamily: 'MontserratBlack',
+                            fontSize: 20.0,
+                            color: Colors.blueAccent,
+                          ),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.symmetric(
+                            vertical: 25.0,
+                            horizontal: 25.0,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.lightBlue[50],
+                            borderRadius: BorderRadius.circular(15),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.blueGrey.withOpacity(0.15),
+                                spreadRadius: 1,
+                                blurRadius: 3,
+                                offset:
+                                    Offset(0, 3), // changes position of shadow
+                              ),
+                            ],
+                          ),
+                          height: 100.0,
+                          width: 350.0,
+                        ),
+                        /*DropdownButton(
+                      items: Constants.menuItems,
+                      value: chosenStamp,
+                      onChanged: con.nothing,
+                      hint: const Text('Time Intervals'),
+                    )*/
+                        const Text(
+                          "Steps",
+                          style: TextStyle(
+                            fontFamily: 'MontserratBlack',
+                            fontSize: 20.0,
+                            color: Colors.blueAccent,
+                          ),
+                        ),
+                        //Listview builder for entries from datapoints
+                        ListView.builder(
+                            shrinkWrap: true,
+                            itemCount:
+                                3, //not sure how many datapoints we're getting per user
+                            itemBuilder: (BuildContext context, int index) {
+                              return Card(
+                                child: ListTile(
+                                  leading: Icon(
+                                    Icons.run_circle_outlined,
+                                    color: Colors.blueAccent,
+                                    size: 50,
+                                  ),
+                                  title: Text(
+                                    'From (time) to (time)',
+                                    style: const TextStyle(
                                       fontFamily: 'Montserrat',
-                                      fontSize: 20.0,
+                                      fontSize: 10.0,
                                       color: Colors.blueAccent,
                                     ),
                                   ),
-                                ),
-                                Positioned(
-                                  top: 85,
-                                  left: 40,
-                                  child: Text(
-                                    "${widget.accelerometer.totalDayDistance.toString()} km",
-                                    style: TextStyle(
+                                  subtitle: Text(
+                                    'You walked (km) km!',
+                                    style: const TextStyle(
                                       fontFamily: 'Montserrat',
-                                      fontSize: 30.0,
                                       color: Colors.black,
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Stack(
-                              children: [
-                                Container(
-                                  margin: const EdgeInsets.symmetric(
-                                    vertical: 25.0,
-                                    horizontal: 25.0,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.lightBlue[50],
-                                    borderRadius: BorderRadius.circular(15),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color:
-                                            Colors.blueGrey.withOpacity(0.15),
-                                        spreadRadius: 1,
-                                        blurRadius: 3,
-                                        offset: Offset(
-                                            0, 3), // changes position of shadow
-                                      ),
-                                    ],
-                                  ),
-                                  height: 150.0,
-                                  width: 150.0,
-                                ),
-                                Positioned(
-                                  top: 35,
-                                  left: 35,
-                                  child: const Text(
-                                    "Total",
-                                    style: TextStyle(
-                                      fontFamily: 'Montserrat',
-                                      fontSize: 20.0,
-                                      color: Colors.blueAccent,
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  top: 85,
-                                  left: 40,
-                                  child: Text(
-                                    "${widget.accelerometer.totalDistance.toString()} km",
-                                    style: TextStyle(
-                                      fontFamily: 'Montserrat',
-                                      fontSize: 30.0,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      /*DropdownButton(
-                    items: Constants.menuItems,
-                    value: chosenStamp,
-                    onChanged: con.nothing,
-                    hint: const Text('Time Intervals'),
-                  )*/
-                    ],
+                              );
+                            })
+                      ],
+                    ),
                   ),
                 ),
               ),
