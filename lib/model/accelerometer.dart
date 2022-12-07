@@ -27,7 +27,7 @@ class Accelerometer {
   late List<dynamic> dataPoints;
   String? collectionInterval;
   String? sendInterval;
-  late List<double> distanceRecords;
+  late List<dynamic> distanceRecords;
   late double totalDayDistance;
   late double totalDistance;
 
