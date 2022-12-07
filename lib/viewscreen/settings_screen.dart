@@ -58,7 +58,7 @@ class _SettingsState extends State<SettingsScreen> {
                 ),
               ),
               DropdownButton(
-                items: Constants.menuItems,
+                items: Constants.collectMenuItems,
                 value: interval,
                 onChanged: con.changeCollectionInterval,
                 hint: const Text('Timestamps'),
@@ -75,7 +75,7 @@ class _SettingsState extends State<SettingsScreen> {
                 ),
               ),
               DropdownButton(
-                items: Constants.menuItems,
+                items: Constants.sendMenuItems,
                 value: interval,
                 onChanged: con.changeSendInterval,
                 hint: const Text('Timestamps'),

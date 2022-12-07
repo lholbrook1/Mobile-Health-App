@@ -14,11 +14,13 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({
     required this.user,
     required this.accelerometer,
+    required this.database,
     Key? key,
   }) : super(key: key);
 
   final User user;
   final Accelerometer accelerometer;
+  final List<DataPoints> database;
   static const routeName = '/homeScreen';
 
   @override
@@ -31,11 +33,7 @@ class _HomeState extends State<HomeScreen> {
   late _Controller con;
   late String email;
   late List<dynamic> userPoints;
-  late Accelerometer myProfile =
-      FirestoreController.getUser(email: widget.user.email!) as Accelerometer;
   var formKey = GlobalKey<FormState>();
-  //Future<List<DataPoints>> dataCSVDatabase = DataPoints.getDataPointsDatabase();
-  //String chosenStamp = '';*/
 
   @override
   void initState() {
@@ -47,6 +45,39 @@ class _HomeState extends State<HomeScreen> {
       userPoints = widget.accelerometer.dataPoints;
     }
     email = widget.user.email ?? 'No email';
+    int randNum = Random().nextInt(6700); //starts at random point of data
+    List<dynamic> collecetedPoints = [];
+    Map<int, Map<String, dynamic>> tempPoints = {};
+    print('collect seconds = ');
+    print(int.parse(widget.accelerometer.collectionInterval!));
+    //timer to collect data points
+    Timer collect = Timer.periodic(
+        Duration(seconds: int.parse(widget.accelerometer.collectionInterval!)),
+        (timer) {
+      int index = 1;
+      //after 5 seconds
+
+      print(widget.database[randNum].xValue);
+      print(widget.database[randNum].yValue);
+
+      tempPoints[index] = {
+        'x': widget.database[randNum].xValue,
+        'y': widget.database[randNum].yValue,
+        "t": DateTime.now()
+      };
+      collecetedPoints.add(tempPoints[index]);
+
+      randNum++;
+      index++;
+      render(() {});
+    });
+
+    Timer send = Timer.periodic(
+        Duration(seconds: int.parse(widget.accelerometer.sendInterval!)),
+        (timer) {
+      widget.accelerometer.sendToCloud(collecetedPoints);
+      collecetedPoints.clear();
+    });
   }
 
   void render(fn) {
@@ -103,13 +134,14 @@ class _HomeState extends State<HomeScreen> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(11.0),
-                          child: ElevatedButton(
+                          child:
+                              Divider(), /*ElevatedButton(
                             onPressed: () {
                               con.getDataTest();
                               con._startTimer();
                             },
                             child: const Text("Start Run"),
-                          ),
+                          ),*/
                         ),
                         const Text(
                           "Distance Traveled",
@@ -318,49 +350,6 @@ class _Controller {
   int randNum = Random().nextInt(6700); //starts at random point of data
   List<dynamic> userPoints = [];
   Map<int, Map<String, dynamic>> tempPoints = {};
-
-  void getDataTest() async {
-    try {
-      Future<List<DataPoints>> getPointsList =
-          DataPoints.getDataPointsDatabase();
-      pointsList = await getPointsList;
-    } catch (e) {
-      if (Constants.devMode) print('===== failed to getdata: $e');
-    }
-  }
-
-  void _startTimer() {
-    try {
-      _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
-        int index = 1;
-        //after 5 seconds
-
-        print(pointsList[randNum].xValue);
-        print(pointsList[randNum].yValue);
-
-        tempPoints[index] = {
-          'x': pointsList[randNum].xValue,
-          'y': pointsList[randNum].yValue,
-          "t": DateTime.now()
-        };
-        userPoints.add(tempPoints[index]);
-
-        randNum++;
-        index++;
-
-        //send to firebase after certain number of datapoints
-        //this example just has it so every two datapoints are stored, its sent to the cloud
-        if (state.userPoints.length % 2 == 0) {
-          Map<String, dynamic> updateInfo = {};
-          updateInfo[Accelerometer.DATAPOINTS] = state.userPoints;
-          await FirestoreController.updateUser(
-              docId: state.widget.accelerometer.docId!, updateInfo: updateInfo);
-        }
-      });
-    } catch (e) {
-      if (Constants.devMode) print('===== failed to startTimer: $e');
-    }
-  }
 
   void settingsPage() async {
     await Navigator.pushNamed(

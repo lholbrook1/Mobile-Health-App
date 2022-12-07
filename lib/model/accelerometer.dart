@@ -106,8 +106,9 @@ class Accelerometer {
       docId: docId,
       email: doc[DocKeyAccelerometer.email.name] ??= 'N/A',
       collectionInterval:
-          doc[DocKeyAccelerometer.collectionInterval.toString()] ??= '60',
-      sendInterval: doc[DocKeyAccelerometer.sendInterval.toString()] ??= '60',
+          doc[DocKeyAccelerometer.collectionInterval.name.toString()] ??= '60',
+      sendInterval: doc[DocKeyAccelerometer.sendInterval.name.toString()] ??=
+          '60',
       dataPoints: doc[DocKeyAccelerometer.dataPoints.name] ??= [],
       distanceRecords: doc[DocKeyAccelerometer.distanceRecords.name] ??= [],
       totalDayDistance: doc[DocKeyAccelerometer.totalDayDistance.name] ??= 0,
@@ -129,5 +130,14 @@ class Accelerometer {
       DocKeyAccelerometer.sendInterval.name: sendInterval,
     };
     FirestoreController.updateUser(docId: docId!, updateInfo: info);
+  }
+
+  void sendToCloud(List<dynamic> x) {
+    if (x != []) {
+      this.dataPoints.addAll(x);
+      Map<String, dynamic> info = {};
+      info[Accelerometer.DATAPOINTS] = dataPoints;
+      FirestoreController.updateUser(docId: docId!, updateInfo: info);
+    }
   }
 }

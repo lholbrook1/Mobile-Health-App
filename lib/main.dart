@@ -80,9 +80,11 @@ class _MyHomePageState extends State<MyHomePage> {
           var arguments = args as Map;
           var user = arguments[ARGS.USER];
           var accelerometer = arguments[ARGS.ACCELEROMETER];
+          var database = arguments[ARGS.DATABASE];
           return HomeScreen(
             user: user,
             accelerometer: accelerometer,
+            database: database,
           );
         },
         SettingsScreen.routeName: (context) {

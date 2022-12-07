@@ -6,6 +6,7 @@ import '../controller/auth_controller.dart';
 import '../controller/firestore_controller.dart';
 import '../model/accelerometer.dart';
 import '../model/constant.dart';
+import '../model/datapoints.dart';
 import 'home_screen.dart';
 import 'view_util.dart';
 
@@ -28,6 +29,8 @@ class _StartState extends State<StartScreen> {
   void initState() {
     super.initState();
     con = _Controller(this);
+    con.getDataTest();
+    print(con.pointsList.length);
   }
 
   @override
@@ -226,6 +229,7 @@ class _Controller {
   _Controller(this.state);
   String? email;
   String? password;
+  List<DataPoints> pointsList = [];
 
   Accelerometer newAccel = Accelerometer();
 
@@ -242,13 +246,15 @@ class _Controller {
       );
 
       Accelerometer accel = await FirestoreController.getUser(email: email!);
-      
+      getDataTest();
+
       await Navigator.pushNamed(
         state.context,
         HomeScreen.routeName,
         arguments: {
           ARGS.USER: user,
           ARGS.ACCELEROMETER: accel,
+          ARGS.DATABASE: pointsList,
         },
       );
     } catch (e) {
@@ -272,7 +278,7 @@ class _Controller {
       //Accelerometer userprof = Accelerometer.set(email!.trim());
       newAccel.email = email!.trim();
       newAccel.distanceRecords = []; //keeps track of distance traveled for day
-      newAccel.dataPoints=[];
+      newAccel.dataPoints = [];
       newAccel.totalDayDistance = 0;
       newAccel.totalDistance = 0;
       newAccel.uid = FirebaseAuth.instance.currentUser?.uid;
@@ -316,6 +322,16 @@ class _Controller {
       return 'Password too short';
     } else {
       return null;
+    }
+  }
+
+  void getDataTest() async {
+    try {
+      Future<List<DataPoints>> getPointsList =
+          DataPoints.getDataPointsDatabase();
+      pointsList = await getPointsList;
+    } catch (e) {
+      if (Constants.devMode) print('===== failed to getdata: $e');
     }
   }
 }
