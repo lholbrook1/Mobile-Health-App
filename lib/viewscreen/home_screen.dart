@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile_health_app/viewscreen/timestamps_screen.dart';
 import '../controller/firestore_controller.dart';
 import '../model/accelerometer.dart';
 import '../model/constant.dart';
@@ -84,6 +85,7 @@ class _HomeState extends State<HomeScreen> {
         (timer) {
       widget.accelerometer.sendToCloud(collecetedPoints);
       collecetedPoints.clear();
+      render(() {});
     });
   }
 
@@ -123,6 +125,11 @@ class _HomeState extends State<HomeScreen> {
                   leading: const Icon(Icons.settings),
                   title: const Text('Settings'),
                   onTap: con.settingsPage,
+                ),
+                ListTile(
+                  leading: const Icon(Icons.list_alt_outlined),
+                  title: const Text('Timestamps'),
+                  onTap: con.timestampsPage,
                 ),
                 ListTile(
                   leading: const Icon(Icons.exit_to_app),
@@ -362,6 +369,18 @@ class _Controller {
     await Navigator.pushNamed(
       state.context,
       SettingsScreen.routeName,
+      arguments: {
+        ARGS.USER: state.widget.user,
+        ARGS.ACCELEROMETER: state.widget.accelerometer,
+      },
+    );
+    Navigator.of(state.context).pop(); // push in drawer
+  }
+
+  void timestampsPage() async {
+    await Navigator.pushNamed(
+      state.context,
+      TimeStampsScreen.routeName,
       arguments: {
         ARGS.USER: state.widget.user,
         ARGS.ACCELEROMETER: state.widget.accelerometer,
