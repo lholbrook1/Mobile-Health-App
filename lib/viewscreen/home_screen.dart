@@ -9,6 +9,9 @@ import '../model/constant.dart';
 import '../model/datapoints.dart';
 import 'settings_screen.dart';
 import 'dart:math';
+import 'package:intl/intl.dart';
+
+import 'start_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -31,8 +34,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeState extends State<HomeScreen> {
   late _Controller con;
+  bool run = false;
   late String email;
   late List<dynamic> userPoints;
+  late List<dynamic> distRecs;
+  late double totalDis;
   var formKey = GlobalKey<FormState>();
 
   @override
@@ -45,6 +51,8 @@ class _HomeState extends State<HomeScreen> {
       userPoints = widget.accelerometer.dataPoints;
     }
     email = widget.user.email ?? 'No email';
+    con.distanceCalc();
+    totalDis = widget.accelerometer.totalDistance;
     int randNum = Random().nextInt(6700); //starts at random point of data
     List<dynamic> collecetedPoints = [];
     Map<int, Map<String, dynamic>> tempPoints = {};
@@ -117,6 +125,11 @@ class _HomeState extends State<HomeScreen> {
                   title: const Text('Settings'),
                   onTap: con.settingsPage,
                 ),
+                ListTile(
+                  leading: const Icon(Icons.exit_to_app),
+                  title: const Text('Log Out'),
+                  onTap: con.logOut,
+                ),
               ],
             ),
           ),
@@ -167,13 +180,11 @@ class _HomeState extends State<HomeScreen> {
                                       borderRadius: BorderRadius.circular(15),
                                       boxShadow: [
                                         BoxShadow(
-                                          color:
-                                              Colors.blueGrey.withOpacity(0.15),
-                                          spreadRadius: 1,
-                                          blurRadius: 3,
-                                          offset: Offset(0,
-                                              3), // changes position of shadow
-                                        ),
+                                            color: Colors.blueGrey
+                                                .withOpacity(0.15),
+                                            spreadRadius: 1,
+                                            blurRadius: 3,
+                                            offset: const Offset(0, 3)),
                                       ],
                                     ),
                                     height: 150.0,
@@ -195,7 +206,7 @@ class _HomeState extends State<HomeScreen> {
                                     top: 85,
                                     left: 40,
                                     child: Text(
-                                      "${widget.accelerometer.totalDayDistance.toString()} km",
+                                      "${widget.accelerometer.totalDayDistance.toStringAsFixed(2)} km",
                                       style: const TextStyle(
                                         fontFamily: 'Montserrat',
                                         fontSize: 30.0,
@@ -248,7 +259,7 @@ class _HomeState extends State<HomeScreen> {
                                     top: 85,
                                     left: 40,
                                     child: Text(
-                                      "${widget.accelerometer.totalDistance.toString()} km",
+                                      "${totalDis.toStringAsFixed(2)} km",
                                       style: const TextStyle(
                                         fontFamily: 'Montserrat',
                                         fontSize: 30.0,
@@ -301,33 +312,37 @@ class _HomeState extends State<HomeScreen> {
                         //Listview builder for entries from datapoints
                         ListView.builder(
                             shrinkWrap: true,
-                            itemCount:
-                                3, //not sure how many datapoints we're getting per user
+                            physics: ClampingScrollPhysics(),
+                            itemCount: (userPoints.isEmpty)
+                                ? 0
+                                : userPoints.length - 1,
                             itemBuilder: (BuildContext context, int index) {
-                              return Card(
-                                child: ListTile(
-                                  leading: Icon(
-                                    Icons.run_circle_outlined,
-                                    color: Colors.blueAccent,
-                                    size: 50,
-                                  ),
-                                  title: Text(
-                                    'From (time) to (time)',
-                                    style: const TextStyle(
-                                      fontFamily: 'Montserrat',
-                                      fontSize: 10.0,
-                                      color: Colors.blueAccent,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    'You walked (km) km!',
-                                    style: const TextStyle(
-                                      fontFamily: 'Montserrat',
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-                              );
+                              return (index + 1 < userPoints.length)
+                                  ? Card(
+                                      child: ListTile(
+                                        leading: Icon(
+                                          Icons.run_circle_outlined,
+                                          color: Colors.blueAccent,
+                                          size: 50,
+                                        ),
+                                        title: Text(
+                                          'From ${DateTime.parse(userPoints[index]['t'].toDate().toString())} to ${DateTime.parse(userPoints[index + 1]['t'].toDate().toString())}',
+                                          style: const TextStyle(
+                                            fontFamily: 'Montserrat',
+                                            fontSize: 10.0,
+                                            color: Colors.blueAccent,
+                                          ),
+                                        ),
+                                        subtitle: Text(
+                                          'You walked ${con.distancesList[index].toStringAsFixed(2)} km!',
+                                          style: const TextStyle(
+                                            fontFamily: 'Montserrat',
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  : Text("");
                             })
                       ],
                     ),
@@ -347,9 +362,82 @@ class _Controller {
 
   late Timer _timer;
   late List<DataPoints> pointsList;
+  List<dynamic> distancesList = [];
   int randNum = Random().nextInt(6700); //starts at random point of data
   List<dynamic> userPoints = [];
   Map<int, Map<String, dynamic>> tempPoints = {};
+
+  void getDataTest() async {
+    try {
+      Future<List<DataPoints>> getPointsList =
+          DataPoints.getDataPointsDatabase();
+      pointsList = await getPointsList;
+    } catch (e) {
+      if (Constants.devMode) print('===== failed to getdata: $e');
+    }
+  }
+
+  void _startTimer() {
+    try {
+      _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
+        int index = 1;
+        //after 5 seconds
+
+        print(pointsList[randNum].xValue);
+        print(pointsList[randNum].yValue);
+
+        tempPoints[index] = {
+          'x': pointsList[randNum].xValue,
+          'y': pointsList[randNum].yValue,
+          "t": DateTime.now()
+        };
+        state.userPoints.add(tempPoints[index]);
+
+        randNum++;
+        index++;
+
+        //send to firebase after certain number of datapoints
+        //this example just has it so every two datapoints are stored, its sent to the cloud
+        if (state.userPoints.length % 2 == 0) {
+          Map<String, dynamic> updateInfo = {};
+          updateInfo[Accelerometer.DATAPOINTS] = state.userPoints;
+          await FirestoreController.updateUser(
+              docId: state.widget.accelerometer.docId!, updateInfo: updateInfo);
+        }
+      });
+    } catch (e) {
+      if (Constants.devMode) print('===== failed to startTimer: $e');
+    }
+  }
+
+  /*void populateDataPoints() async {
+    if (state.dataCSVDatabase.isEmpty) {
+      state.dataCSVDatabase = await DataPoints.getDataPointsDatabase();
+    }
+  }*/
+
+  /*List<DropdownMenuItem<String>>? getTimestamps() {
+    //populateDataPoints();
+    var timeStampset = <DropdownMenuItem<String>>[];
+    state.dataCSVDatabase.forEach(point) {
+      timeStampset.add(DropdownMenuItem(
+        value: point.timestamp.toString(),
+        child: Text(point.timestamp.toString()),
+      ));
+    }
+
+    //timeStampset = ({...timeStampset}.toList());
+    //timeStampset.sort((b, a) => a.compareTo(b));
+
+    return timeStampset;
+  }*/
+
+  /*void nothing(String? value) {
+    if (value != null) {
+      state.chosenStamp = value;
+      state.render(() {});
+    }
+  }*/
 
   void settingsPage() async {
     await Navigator.pushNamed(
@@ -359,6 +447,15 @@ class _Controller {
         ARGS.USER: state.widget.user,
         ARGS.ACCELEROMETER: state.widget.accelerometer,
       },
+    );
+    Navigator.of(state.context).pop(); // push in drawer
+  }
+
+  void logOut() async {
+    Navigator.of(state.context).pop();
+    await Navigator.pushNamed(
+      state.context,
+      StartScreen.routeName,
     );
     Navigator.of(state.context).pop(); // push in drawer
   }
