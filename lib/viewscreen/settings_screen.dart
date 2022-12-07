@@ -24,7 +24,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsState extends State<SettingsScreen> {
   late _Controller con;
   String interval = "60";
-  String dataSend = '60';
+  String dataSend = '61';
   late String email;
 
   @override
@@ -63,7 +63,7 @@ class _SettingsState extends State<SettingsScreen> {
                 onChanged: con.changeCollectionInterval,
                 hint: const Text('Timestamps'),
               ),
-              Divider(
+              const Divider(
                 height: 100,
               ),
               const Text(
@@ -76,7 +76,7 @@ class _SettingsState extends State<SettingsScreen> {
               ),
               DropdownButton(
                 items: Constants.sendMenuItems,
-                value: interval,
+                value: dataSend,
                 onChanged: con.changeSendInterval,
                 hint: const Text('Timestamps'),
               )
