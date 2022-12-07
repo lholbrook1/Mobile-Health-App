@@ -30,6 +30,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeState extends State<HomeScreen> {
   late _Controller con;
   late String email;
+  late List<dynamic> userPoints;
   late Accelerometer myProfile =
       FirestoreController.getUser(email: widget.user.email!) as Accelerometer;
   var formKey = GlobalKey<FormState>();
@@ -40,6 +41,11 @@ class _HomeState extends State<HomeScreen> {
   void initState() {
     super.initState();
     con = _Controller(this);
+    if (widget.accelerometer.dataPoints.isEmpty) {
+      userPoints = [];
+    } else {
+      userPoints = widget.accelerometer.dataPoints;
+    }
     email = widget.user.email ?? 'No email';
   }
 
@@ -344,9 +350,9 @@ class _Controller {
 
         //send to firebase after certain number of datapoints
         //this example just has it so every two datapoints are stored, its sent to the cloud
-        if (userPoints.length % 2 == 0) {
+        if (state.userPoints.length % 2 == 0) {
           Map<String, dynamic> updateInfo = {};
-          updateInfo[Accelerometer.DATAPOINTS] = userPoints;
+          updateInfo[Accelerometer.DATAPOINTS] = state.userPoints;
           await FirestoreController.updateUser(
               docId: state.widget.accelerometer.docId!, updateInfo: updateInfo);
         }

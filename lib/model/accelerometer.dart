@@ -42,8 +42,8 @@ class Accelerometer {
     List<dynamic>? dataPoints,
     List<dynamic>? distanceRecords,
   }) {
-    distanceRecords = distanceRecords == null ? [] : [...distanceRecords];
-    dataPoints = dataPoints == null ? [] : [...dataPoints];
+    this.distanceRecords = distanceRecords == null ? [] : [...distanceRecords];
+    this.dataPoints = dataPoints == null ? [] : [...dataPoints];
   }
 
   Accelerometer.set(this.email) {
@@ -66,7 +66,7 @@ class Accelerometer {
     distanceRecords = distanceRecords == null ? [] : [...distanceRecords];
     totalDayDistance = p.totalDayDistance;
     totalDistance = p.totalDistance;
-    dataPoints = dataPoints == null ? [] : [...dataPoints];
+    dataPoints = p.dataPoints == null ? [] : [...dataPoints];
   }
 
   //a.copyFrom(b) ==> a = b
