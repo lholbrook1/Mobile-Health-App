@@ -11,6 +11,8 @@ import 'settings_screen.dart';
 import 'dart:math';
 import 'package:intl/intl.dart';
 
+import 'start_screen.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
     required this.user,
@@ -34,6 +36,7 @@ class _HomeState extends State<HomeScreen> {
   late String email;
   late List<dynamic> userPoints;
   late List<dynamic> distRecs;
+  late double totalDis;
   late Accelerometer myProfile =
       FirestoreController.getUser(email: widget.user.email!) as Accelerometer;
   var formKey = GlobalKey<FormState>();
@@ -51,6 +54,7 @@ class _HomeState extends State<HomeScreen> {
     }
     email = widget.user.email ?? 'No email';
     con.distanceCalc();
+    totalDis = widget.accelerometer.totalDistance;
   }
 
   void render(fn) {
@@ -90,6 +94,11 @@ class _HomeState extends State<HomeScreen> {
                   title: const Text('Settings'),
                   onTap: con.settingsPage,
                 ),
+                ListTile(
+                  leading: const Icon(Icons.exit_to_app),
+                  title: const Text('Log Out'),
+                  onTap: con.logOut,
+                ),
               ],
             ),
           ),
@@ -105,30 +114,27 @@ class _HomeState extends State<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.all(11.0),
-                          child: Row(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    con.getDataTest();
-                                    con._startTimer();
-                                    run = true;
-                                  },
-                                  child: const Text("Start Run"),
-                                ),
-                              ),
-                              ElevatedButton(
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ElevatedButton(
                                 onPressed: () {
-                                  con._timer.cancel();
-                                  run = false;
+                                  con.getDataTest();
+                                  con._startTimer();
+                                  run = true;
                                 },
-                                child: const Text("End Run"),
+                                child: const Text("Start Run"),
                               ),
-                            ],
-                          ),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                con._timer.cancel();
+                                run = false;
+                              },
+                              child: const Text("End Run"),
+                            ),
+                          ],
                         ),
                         const Text(
                           "Distance Traveled",
@@ -158,8 +164,7 @@ class _HomeState extends State<HomeScreen> {
                                               Colors.blueGrey.withOpacity(0.15),
                                           spreadRadius: 1,
                                           blurRadius: 3,
-                                          offset: Offset(0,
-                                              3), // changes position of shadow
+                                          offset: const Offset(0, 3)
                                         ),
                                       ],
                                     ),
@@ -182,7 +187,7 @@ class _HomeState extends State<HomeScreen> {
                                     top: 85,
                                     left: 40,
                                     child: Text(
-                                      "${widget.accelerometer.totalDayDistance.toString()} km",
+                                      "${widget.accelerometer.totalDayDistance.toStringAsFixed(2)} km",
                                       style: const TextStyle(
                                         fontFamily: 'Montserrat',
                                         fontSize: 30.0,
@@ -235,7 +240,7 @@ class _HomeState extends State<HomeScreen> {
                                     top: 85,
                                     left: 40,
                                     child: Text(
-                                      "${widget.accelerometer.totalDistance.toString()} km",
+                                      "${totalDis.toStringAsFixed(2)} km",
                                       style: const TextStyle(
                                         fontFamily: 'Montserrat',
                                         fontSize: 30.0,
@@ -295,7 +300,9 @@ class _HomeState extends State<HomeScreen> {
                         ListView.builder(
                             shrinkWrap: true,
                             physics: ClampingScrollPhysics(),
-                            itemCount: (userPoints.isEmpty) ? 0 : userPoints.length - 1,
+                            itemCount: (userPoints.isEmpty)
+                                ? 0
+                                : userPoints.length - 1,
                             itemBuilder: (BuildContext context, int index) {
                               return (index + 1 < userPoints.length)
                                   ? Card(
@@ -313,7 +320,8 @@ class _HomeState extends State<HomeScreen> {
                                             color: Colors.blueAccent,
                                           ),
                                         ),
-                                        subtitle: Text('You walked ${con.distancesList[index].toStringAsFixed(2)} km!',
+                                        subtitle: Text(
+                                          'You walked ${con.distancesList[index].toStringAsFixed(2)} km!',
                                           style: const TextStyle(
                                             fontFamily: 'Montserrat',
                                             color: Colors.black,
@@ -373,7 +381,6 @@ class _Controller {
       var cKm = 111 * c;
       distancesList.add(cKm);
     }
-
   }
 
   void _startTimer() {
@@ -390,11 +397,18 @@ class _Controller {
         randNum++;
         index++;
         distanceCalc();
+        int j = 0;
+        double sum = 0;
+        for (int i = distancesList.length; i > 0; i--) {
+          sum = sum + distancesList[i-1];
+        }
+        print(sum);
         //this example just has it so every two datapoints are stored, its sent to the cloud
         if (state.userPoints.length % 2 == 0) {
           Map<String, dynamic> updateInfo = {};
           updateInfo[Accelerometer.DISTANCERECS] = distancesList;
           updateInfo[Accelerometer.DATAPOINTS] = state.userPoints;
+          updateInfo[Accelerometer.TOTALDISTANCE] = sum;
           await FirestoreController.updateUser(
               docId: state.widget.accelerometer.docId!, updateInfo: updateInfo);
           Accelerometer updateAccel =
@@ -402,6 +416,7 @@ class _Controller {
           state.render(() {
             state.userPoints = updateAccel.dataPoints;
             state.distRecs = updateAccel.distanceRecords;
+            state.totalDis = updateAccel.totalDistance;
           });
         }
       });
@@ -447,6 +462,15 @@ class _Controller {
         ARGS.USER: state.widget.user,
         ARGS.ACCELEROMETER: state.widget.accelerometer,
       },
+    );
+    Navigator.of(state.context).pop(); // push in drawer
+  }
+
+  void logOut() async {
+    Navigator.of(state.context).pop();
+    await Navigator.pushNamed(
+      state.context,
+      StartScreen.routeName,
     );
     Navigator.of(state.context).pop(); // push in drawer
   }
