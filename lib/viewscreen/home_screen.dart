@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile_health_app/viewscreen/timestamps_screen.dart';
 import '../controller/firestore_controller.dart';
 import '../model/accelerometer.dart';
 import '../model/constant.dart';
@@ -17,11 +18,13 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({
     required this.user,
     required this.accelerometer,
+    required this.database,
     Key? key,
   }) : super(key: key);
 
   final User user;
   final Accelerometer accelerometer;
+  final List<DataPoints> database;
   static const routeName = '/homeScreen';
 
   @override
@@ -37,11 +40,7 @@ class _HomeState extends State<HomeScreen> {
   late List<dynamic> userPoints;
   late List<dynamic> distRecs;
   late double totalDis;
-  late Accelerometer myProfile =
-      FirestoreController.getUser(email: widget.user.email!) as Accelerometer;
   var formKey = GlobalKey<FormState>();
-  //Future<List<DataPoints>> dataCSVDatabase = DataPoints.getDataPointsDatabase();
-  //String chosenStamp = '';*/
 
   @override
   void initState() {
@@ -55,6 +54,39 @@ class _HomeState extends State<HomeScreen> {
     email = widget.user.email ?? 'No email';
     con.distanceCalc();
     totalDis = widget.accelerometer.totalDistance;
+    int randNum = Random().nextInt(6700); //starts at random point of data
+    List<dynamic> collecetedPoints = [];
+    Map<int, Map<String, dynamic>> tempPoints = {};
+    print('collect seconds = ');
+    print(int.parse(widget.accelerometer.collectionInterval!));
+    //timer to collect data points
+    Timer collect = Timer.periodic(
+        Duration(seconds: int.parse(widget.accelerometer.collectionInterval!)),
+        (timer) {
+      int index = 1;
+
+      print(widget.database[randNum].xValue);
+      print(widget.database[randNum].yValue);
+
+      tempPoints[index] = {
+        'x': widget.database[randNum].xValue,
+        'y': widget.database[randNum].yValue,
+        "t": DateTime.now()
+      };
+      collecetedPoints.add(tempPoints[index]);
+
+      randNum++;
+      index++;
+      render(() {});
+    });
+
+    Timer send = Timer.periodic(
+        Duration(seconds: int.parse(widget.accelerometer.sendInterval!)),
+        (timer) {
+      widget.accelerometer.sendToCloud(collecetedPoints);
+      collecetedPoints.clear();
+      render(() {});
+    });
   }
 
   void render(fn) {
@@ -95,6 +127,11 @@ class _HomeState extends State<HomeScreen> {
                   onTap: con.settingsPage,
                 ),
                 ListTile(
+                  leading: const Icon(Icons.list_alt_outlined),
+                  title: const Text('Timestamps'),
+                  onTap: con.timestampsPage,
+                ),
+                ListTile(
                   leading: const Icon(Icons.exit_to_app),
                   title: const Text('Log Out'),
                   onTap: con.logOut,
@@ -114,27 +151,9 @@ class _HomeState extends State<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Row(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  con.getDataTest();
-                                  con._startTimer();
-                                  run = true;
-                                },
-                                child: const Text("Start Run"),
-                              ),
-                            ),
-                            ElevatedButton(
-                              onPressed: () {
-                                con._timer.cancel();
-                                run = false;
-                              },
-                              child: const Text("End Run"),
-                            ),
-                          ],
+                        Padding(
+                          padding: const EdgeInsets.all(11.0),
+                          child: Divider(),
                         ),
                         const Text(
                           "Distance Traveled",
@@ -160,12 +179,11 @@ class _HomeState extends State<HomeScreen> {
                                       borderRadius: BorderRadius.circular(15),
                                       boxShadow: [
                                         BoxShadow(
-                                          color:
-                                              Colors.blueGrey.withOpacity(0.15),
-                                          spreadRadius: 1,
-                                          blurRadius: 3,
-                                          offset: const Offset(0, 3)
-                                        ),
+                                            color: Colors.blueGrey
+                                                .withOpacity(0.15),
+                                            spreadRadius: 1,
+                                            blurRadius: 3,
+                                            offset: const Offset(0, 3)),
                                       ],
                                     ),
                                     height: 150.0,
@@ -282,12 +300,6 @@ class _HomeState extends State<HomeScreen> {
                           height: 100.0,
                           width: 350.0,
                         ),
-                        /*DropdownButton(
-                      items: Constants.menuItems,
-                      value: chosenStamp,
-                      onChanged: con.nothing,
-                      hint: const Text('Time Intervals'),
-                    )*/
                         const Text(
                           "Steps",
                           style: TextStyle(
@@ -347,20 +359,43 @@ class _Controller {
   _Controller(this.state);
   DataPoints newPoint = DataPoints();
 
-  late Timer _timer;
   late List<DataPoints> pointsList;
   List<dynamic> distancesList = [];
   int randNum = Random().nextInt(6700); //starts at random point of data
+  List<dynamic> userPoints = [];
   Map<int, Map<String, dynamic>> tempPoints = {};
 
-  void getDataTest() async {
-    try {
-      Future<List<DataPoints>> getPointsList =
-          DataPoints.getDataPointsDatabase();
-      pointsList = await getPointsList;
-    } catch (e) {
-      if (Constants.devMode) print('===== failed to getdata: $e');
-    }
+  void settingsPage() async {
+    await Navigator.pushNamed(
+      state.context,
+      SettingsScreen.routeName,
+      arguments: {
+        ARGS.USER: state.widget.user,
+        ARGS.ACCELEROMETER: state.widget.accelerometer,
+      },
+    );
+    Navigator.of(state.context).pop(); // push in drawer
+  }
+
+  void timestampsPage() async {
+    await Navigator.pushNamed(
+      state.context,
+      TimeStampsScreen.routeName,
+      arguments: {
+        ARGS.USER: state.widget.user,
+        ARGS.ACCELEROMETER: state.widget.accelerometer,
+      },
+    );
+    Navigator.of(state.context).pop(); // push in drawer
+  }
+
+  void logOut() async {
+    Navigator.of(state.context).pop();
+    await Navigator.pushNamed(
+      state.context,
+      StartScreen.routeName,
+    );
+    Navigator.of(state.context).pop(); // push in drawer
   }
 
   void distanceCalc() {
@@ -381,97 +416,5 @@ class _Controller {
       var cKm = 111 * c;
       distancesList.add(cKm);
     }
-  }
-
-  void _startTimer() {
-    try {
-      _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
-        int index = 1;
-        //after 5 seconds
-        tempPoints[index] = {
-          'x': pointsList[randNum].xValue,
-          'y': pointsList[randNum].yValue,
-          't': DateTime.now()
-        };
-        state.userPoints.add(tempPoints[index]);
-        randNum++;
-        index++;
-        distanceCalc();
-        int j = 0;
-        double sum = 0;
-        for (int i = distancesList.length; i > 0; i--) {
-          sum = sum + distancesList[i-1];
-        }
-        print(sum);
-        //this example just has it so every two datapoints are stored, its sent to the cloud
-        if (state.userPoints.length % 2 == 0) {
-          Map<String, dynamic> updateInfo = {};
-          updateInfo[Accelerometer.DISTANCERECS] = distancesList;
-          updateInfo[Accelerometer.DATAPOINTS] = state.userPoints;
-          updateInfo[Accelerometer.TOTALDISTANCE] = sum;
-          await FirestoreController.updateUser(
-              docId: state.widget.accelerometer.docId!, updateInfo: updateInfo);
-          Accelerometer updateAccel =
-              await FirestoreController.getUser(email: state.email);
-          state.render(() {
-            state.userPoints = updateAccel.dataPoints;
-            state.distRecs = updateAccel.distanceRecords;
-            state.totalDis = updateAccel.totalDistance;
-          });
-        }
-      });
-    } catch (e) {
-      if (Constants.devMode) print('===== failed to startTimer: $e');
-    }
-  }
-
-  /*void populateDataPoints() async {
-    if (state.dataCSVDatabase.isEmpty) {
-      state.dataCSVDatabase = await DataPoints.getDataPointsDatabase();
-    }
-  }*/
-
-  /*List<DropdownMenuItem<String>>? getTimestamps() {
-    //populateDataPoints();
-    var timeStampset = <DropdownMenuItem<String>>[];
-    state.dataCSVDatabase.forEach(point) {
-      timeStampset.add(DropdownMenuItem(
-        value: point.timestamp.toString(),
-        child: Text(point.timestamp.toString()),
-      ));
-    }
-
-    //timeStampset = ({...timeStampset}.toList());
-    //timeStampset.sort((b, a) => a.compareTo(b));
-
-    return timeStampset;
-  }*/
-
-  /*void nothing(String? value) {
-    if (value != null) {
-      state.chosenStamp = value;
-      state.render(() {});
-    }
-  }*/
-
-  void settingsPage() async {
-    await Navigator.pushNamed(
-      state.context,
-      SettingsScreen.routeName,
-      arguments: {
-        ARGS.USER: state.widget.user,
-        ARGS.ACCELEROMETER: state.widget.accelerometer,
-      },
-    );
-    Navigator.of(state.context).pop(); // push in drawer
-  }
-
-  void logOut() async {
-    Navigator.of(state.context).pop();
-    await Navigator.pushNamed(
-      state.context,
-      StartScreen.routeName,
-    );
-    Navigator.of(state.context).pop(); // push in drawer
   }
 }
