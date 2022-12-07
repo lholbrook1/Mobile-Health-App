@@ -63,7 +63,6 @@ class _HomeState extends State<HomeScreen> {
         Duration(seconds: int.parse(widget.accelerometer.collectionInterval!)),
         (timer) {
       int index = 1;
-      //after 5 seconds
 
       print(widget.database[randNum].xValue);
       print(widget.database[randNum].yValue);
@@ -147,14 +146,7 @@ class _HomeState extends State<HomeScreen> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(11.0),
-                          child:
-                              Divider(), /*ElevatedButton(
-                            onPressed: () {
-                              con.getDataTest();
-                              con._startTimer();
-                            },
-                            child: const Text("Start Run"),
-                          ),*/
+                          child: Divider(),
                         ),
                         const Text(
                           "Distance Traveled",
@@ -360,84 +352,11 @@ class _Controller {
   _Controller(this.state);
   DataPoints newPoint = DataPoints();
 
-  late Timer _timer;
   late List<DataPoints> pointsList;
   List<dynamic> distancesList = [];
   int randNum = Random().nextInt(6700); //starts at random point of data
   List<dynamic> userPoints = [];
   Map<int, Map<String, dynamic>> tempPoints = {};
-
-  void getDataTest() async {
-    try {
-      Future<List<DataPoints>> getPointsList =
-          DataPoints.getDataPointsDatabase();
-      pointsList = await getPointsList;
-    } catch (e) {
-      if (Constants.devMode) print('===== failed to getdata: $e');
-    }
-  }
-
-  void _startTimer() {
-    try {
-      _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
-        int index = 1;
-        //after 5 seconds
-
-        print(pointsList[randNum].xValue);
-        print(pointsList[randNum].yValue);
-
-        tempPoints[index] = {
-          'x': pointsList[randNum].xValue,
-          'y': pointsList[randNum].yValue,
-          "t": DateTime.now()
-        };
-        state.userPoints.add(tempPoints[index]);
-
-        randNum++;
-        index++;
-
-        //send to firebase after certain number of datapoints
-        //this example just has it so every two datapoints are stored, its sent to the cloud
-        if (state.userPoints.length % 2 == 0) {
-          Map<String, dynamic> updateInfo = {};
-          updateInfo[Accelerometer.DATAPOINTS] = state.userPoints;
-          await FirestoreController.updateUser(
-              docId: state.widget.accelerometer.docId!, updateInfo: updateInfo);
-        }
-      });
-    } catch (e) {
-      if (Constants.devMode) print('===== failed to startTimer: $e');
-    }
-  }
-
-  /*void populateDataPoints() async {
-    if (state.dataCSVDatabase.isEmpty) {
-      state.dataCSVDatabase = await DataPoints.getDataPointsDatabase();
-    }
-  }*/
-
-  /*List<DropdownMenuItem<String>>? getTimestamps() {
-    //populateDataPoints();
-    var timeStampset = <DropdownMenuItem<String>>[];
-    state.dataCSVDatabase.forEach(point) {
-      timeStampset.add(DropdownMenuItem(
-        value: point.timestamp.toString(),
-        child: Text(point.timestamp.toString()),
-      ));
-    }
-
-    //timeStampset = ({...timeStampset}.toList());
-    //timeStampset.sort((b, a) => a.compareTo(b));
-
-    return timeStampset;
-  }*/
-
-  /*void nothing(String? value) {
-    if (value != null) {
-      state.chosenStamp = value;
-      state.render(() {});
-    }
-  }*/
 
   void settingsPage() async {
     await Navigator.pushNamed(
@@ -458,5 +377,25 @@ class _Controller {
       StartScreen.routeName,
     );
     Navigator.of(state.context).pop(); // push in drawer
+  }
+
+  void distanceCalc() {
+    //1.0 degrees = 111km
+    //0.1 degree = 11.1km
+    //http://wiki.gis.com/wiki/index.php/Decimal_degrees
+
+    distancesList.clear();
+    for (int i = 0; i < state.userPoints.length - 1; i++) {
+      var x = double.parse(state.userPoints[i]['x']) -
+          double.parse(state.userPoints[i + 1]['x']);
+      var y = double.parse(state.userPoints[i]['y']) -
+          double.parse(state.userPoints[i + 1]['y']);
+
+      var c2 = pow(x, 2) * pow(y, 2);
+      var c = sqrt(c2);
+
+      var cKm = 111 * c;
+      distancesList.add(cKm);
+    }
   }
 }
