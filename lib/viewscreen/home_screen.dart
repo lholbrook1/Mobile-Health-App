@@ -111,17 +111,17 @@ class _HomeState extends State<HomeScreen> {
                                 padding: const EdgeInsets.all(8.0),
                                 child: ElevatedButton(
                                   onPressed: () {
-                                      con.getDataTest();
-                                      con._startTimer();
-                                      run = true;
+                                    con.getDataTest();
+                                    con._startTimer();
+                                    run = true;
                                   },
                                   child: const Text("Start Run"),
                                 ),
                               ),
-                               ElevatedButton(
+                              ElevatedButton(
                                 onPressed: () {
-                                    con._timer.cancel();
-                                    run = false;
+                                  con._timer.cancel();
+                                  run = false;
                                 },
                                 child: const Text("End Run"),
                               ),
@@ -313,7 +313,7 @@ class _HomeState extends State<HomeScreen> {
                                           ),
                                         ),
                                         subtitle: Text(
-                                          'You walked (km) km!',
+                                          'You walked ${widget.accelerometer.distanceRecords[index].toStringAsFixed(2)} km!',
                                           style: const TextStyle(
                                             fontFamily: 'Montserrat',
                                             color: Colors.black,
@@ -341,6 +341,7 @@ class _Controller {
 
   late Timer _timer;
   late List<DataPoints> pointsList;
+  List<dynamic> distancesList = [];
   int randNum = Random().nextInt(6700); //starts at random point of data
   Map<int, Map<String, dynamic>> tempPoints = {};
 
@@ -354,6 +355,27 @@ class _Controller {
     }
   }
 
+  void distanceCalc() {
+    //1.0 degrees = 111km
+    //0.1 degree = 11.1km
+    //http://wiki.gis.com/wiki/index.php/Decimal_degrees
+
+    distancesList.clear();
+    for (int i = 0; i < state.userPoints.length - 1; i++) {
+      var x = double.parse(state.userPoints[i]['x']) -
+          double.parse(state.userPoints[i + 1]['x']);
+      var y = double.parse(state.userPoints[i]['y']) -
+          double.parse(state.userPoints[i + 1]['y']);
+
+      var c2 = pow(x, 2) * pow(y, 2);
+      var c = sqrt(c2);
+
+      var cKm = 111 * c;
+      distancesList.add(cKm);
+    }
+
+  }
+
   void _startTimer() {
     try {
       _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
@@ -362,16 +384,17 @@ class _Controller {
         tempPoints[index] = {
           'x': pointsList[randNum].xValue,
           'y': pointsList[randNum].yValue,
-          "t": DateTime.now()
+          't': DateTime.now()
         };
         state.userPoints.add(tempPoints[index]);
-
         randNum++;
         index++;
 
         //this example just has it so every two datapoints are stored, its sent to the cloud
         if (state.userPoints.length % 2 == 0) {
+          distanceCalc();
           Map<String, dynamic> updateInfo = {};
+          updateInfo[Accelerometer.DISTANCERECS] = distancesList;
           updateInfo[Accelerometer.DATAPOINTS] = state.userPoints;
           await FirestoreController.updateUser(
               docId: state.widget.accelerometer.docId!, updateInfo: updateInfo);
