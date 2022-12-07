@@ -33,6 +33,7 @@ class _HomeState extends State<HomeScreen> {
   bool run = false;
   late String email;
   late List<dynamic> userPoints;
+  late List<dynamic> distRecs;
   late Accelerometer myProfile =
       FirestoreController.getUser(email: widget.user.email!) as Accelerometer;
   var formKey = GlobalKey<FormState>();
@@ -49,6 +50,7 @@ class _HomeState extends State<HomeScreen> {
       userPoints = widget.accelerometer.dataPoints;
     }
     email = widget.user.email ?? 'No email';
+    con.distanceCalc();
   }
 
   void render(fn) {
@@ -293,8 +295,7 @@ class _HomeState extends State<HomeScreen> {
                         ListView.builder(
                             shrinkWrap: true,
                             physics: ClampingScrollPhysics(),
-                            itemCount:
-                                (userPoints.length > 1) ? userPoints.length : 0,
+                            itemCount: (userPoints.isEmpty) ? 0 : userPoints.length - 1,
                             itemBuilder: (BuildContext context, int index) {
                               return (index + 1 < userPoints.length)
                                   ? Card(
@@ -312,8 +313,7 @@ class _HomeState extends State<HomeScreen> {
                                             color: Colors.blueAccent,
                                           ),
                                         ),
-                                        subtitle: Text(
-                                          'You walked ${widget.accelerometer.distanceRecords[index].toStringAsFixed(2)} km!',
+                                        subtitle: Text('You walked ${con.distancesList[index].toStringAsFixed(2)} km!',
                                           style: const TextStyle(
                                             fontFamily: 'Montserrat',
                                             color: Colors.black,
@@ -389,10 +389,9 @@ class _Controller {
         state.userPoints.add(tempPoints[index]);
         randNum++;
         index++;
-
+        distanceCalc();
         //this example just has it so every two datapoints are stored, its sent to the cloud
         if (state.userPoints.length % 2 == 0) {
-          distanceCalc();
           Map<String, dynamic> updateInfo = {};
           updateInfo[Accelerometer.DISTANCERECS] = distancesList;
           updateInfo[Accelerometer.DATAPOINTS] = state.userPoints;
@@ -402,6 +401,7 @@ class _Controller {
               await FirestoreController.getUser(email: state.email);
           state.render(() {
             state.userPoints = updateAccel.dataPoints;
+            state.distRecs = updateAccel.distanceRecords;
           });
         }
       });
