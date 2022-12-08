@@ -10,6 +10,7 @@ enum DocKeyAccelerometer {
   distanceRecords,
   totalDayDistance,
   totalDistance,
+  magList,
 }
 
 class Accelerometer {
@@ -20,6 +21,7 @@ class Accelerometer {
   static const DISTANCERECS = 'distanceRecords';
   static const DAYDISTANCE = 'totalDayDistance';
   static const TOTALDISTANCE = 'totalDistance';
+  static const MAGNILIST = 'magList';
 
   String? uid; //firestore auto generated id
   String? docId;
@@ -30,6 +32,7 @@ class Accelerometer {
   late List<dynamic> distanceRecords;
   late double totalDayDistance;
   late double totalDistance;
+  late List<dynamic> magList;
 
   Accelerometer({
     this.uid,
@@ -41,9 +44,11 @@ class Accelerometer {
     this.totalDistance = 0,
     List<dynamic>? dataPoints,
     List<dynamic>? distanceRecords,
+    List<dynamic>? magList,
   }) {
     this.distanceRecords = distanceRecords == null ? [] : [...distanceRecords];
     this.dataPoints = dataPoints == null ? [] : [...dataPoints];
+    this.magList = magList== null ? [] : [...magList];
   }
 
   Accelerometer.set(this.email) {
@@ -55,6 +60,7 @@ class Accelerometer {
     this.totalDistance;
     dataPoints = [];
     distanceRecords = [];
+    magList = [];
   }
 
   Accelerometer.clone(Accelerometer p) {
@@ -67,6 +73,7 @@ class Accelerometer {
     totalDayDistance = p.totalDayDistance;
     totalDistance = p.totalDistance;
     dataPoints = p.dataPoints == null ? [] : [...dataPoints];
+    magList = p.magList== null ? [] : [...magList];
   }
 
   //a.copyFrom(b) ==> a = b
@@ -82,6 +89,8 @@ class Accelerometer {
     dataPoints.addAll(p.dataPoints);
     distanceRecords.clear();
     distanceRecords.addAll(p.distanceRecords);
+    magList.clear();
+    magList.addAll(p.magList);
   }
 
   //serialization
@@ -95,6 +104,7 @@ class Accelerometer {
       DocKeyAccelerometer.distanceRecords.name: distanceRecords,
       DocKeyAccelerometer.totalDayDistance.name: totalDayDistance,
       DocKeyAccelerometer.totalDistance.name: totalDistance,
+      DocKeyAccelerometer.magList.name: magList,
     };
   }
 
@@ -113,6 +123,7 @@ class Accelerometer {
       distanceRecords: doc[DocKeyAccelerometer.distanceRecords.name] ??= [],
       totalDayDistance: doc[DocKeyAccelerometer.totalDayDistance.name] ??= 0,
       totalDistance: doc[DocKeyAccelerometer.totalDistance.name] ??= 0,
+      magList: doc[DocKeyAccelerometer.magList.name] ??= [],
     );
   }
 

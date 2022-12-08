@@ -5,23 +5,28 @@ enum DocKeyData {
   xvalue,
   yvalue,
   timestamp,
+  zValue,
 }
 
 class DataPoints {
   String? docID;
   String? xValue;
   String? yValue;
+
+  String? zValue;
   DateTime? timestamp;
 
   DataPoints({
     this.docID,
     this.xValue,
     this.yValue,
+    this.zValue,
     this.timestamp,
   });
 
   static const X_VALUE = 'x-value';
   static const Y_VALUE = 'y-value';
+  static const Z_VALUE = 'z-value';
   static const TIMESTAMP = 'timestamp';
 
   //serialization
@@ -29,6 +34,7 @@ class DataPoints {
     return {
       X_VALUE: xValue,
       Y_VALUE: yValue,
+      Z_VALUE: zValue,
       TIMESTAMP: timestamp,
     };
   }
@@ -40,6 +46,7 @@ class DataPoints {
         docID: docId,
         xValue: doc[X_VALUE],
         yValue: doc[Y_VALUE],
+        zValue: doc[Z_VALUE],
         timestamp: doc[TIMESTAMP]);
   }
 
@@ -53,6 +60,7 @@ class DataPoints {
       var oneDataPoint = DataPoints(
         xValue: rowInfo[0].toString(),
         yValue: rowInfo[1].toString(),
+        zValue: rowInfo[2].toString(),
         timestamp: DateTime.fromMillisecondsSinceEpoch(rowInfo[3].toInt()),
       );
       //print(oneDataPoint.timestamp);
