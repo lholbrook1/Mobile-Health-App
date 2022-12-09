@@ -276,11 +276,8 @@ class _Controller {
       );
 
       //Accelerometer userprof = Accelerometer.set(email!.trim());
-      newAccel.email = email!.trim();
-      newAccel.distanceRecords = []; //keeps track of distance traveled for day
+      newAccel.email = email!.trim(); //keeps track of distance traveled for day
       newAccel.dataPoints = [];
-      newAccel.totalDayDistance = 0;
-      newAccel.totalDistance = 0;
       newAccel.uid = FirebaseAuth.instance.currentUser?.uid;
       FirestoreController.addUser(userProf: newAccel);
       showSnackBar(

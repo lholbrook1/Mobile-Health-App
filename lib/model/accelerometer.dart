@@ -7,9 +7,8 @@ enum DocKeyAccelerometer {
   collectionInterval,
   sendInterval,
   dataPoints,
-  distanceRecords,
-  totalDayDistance,
-  totalDistance,
+  magList,
+  stepsList,
 }
 
 class Accelerometer {
@@ -17,9 +16,8 @@ class Accelerometer {
   static const EMAIL = 'email';
   static const DATAPOINTS = 'dataPoints';
   static const INTERVAL = 'collectionInterval';
-  static const DISTANCERECS = 'distanceRecords';
-  static const DAYDISTANCE = 'totalDayDistance';
-  static const TOTALDISTANCE = 'totalDistance';
+  static const MAGNILIST = 'magList';
+  static const STEPS = 'stepsList';
 
   String? uid; //firestore auto generated id
   String? docId;
@@ -27,9 +25,8 @@ class Accelerometer {
   late List<dynamic> dataPoints;
   String? collectionInterval;
   String? sendInterval;
-  late List<dynamic> distanceRecords;
-  late double totalDayDistance;
-  late double totalDistance;
+  late List<dynamic> magList;
+  late List<dynamic> stepsList;
 
   Accelerometer({
     this.uid,
@@ -37,13 +34,13 @@ class Accelerometer {
     this.email = '',
     this.collectionInterval = '60',
     this.sendInterval = '60',
-    this.totalDayDistance = 0,
-    this.totalDistance = 0,
+    List<dynamic>? stepsList,
     List<dynamic>? dataPoints,
-    List<dynamic>? distanceRecords,
+    List<dynamic>? magList,
   }) {
-    this.distanceRecords = distanceRecords == null ? [] : [...distanceRecords];
+    this.stepsList = stepsList == null ? [] : [...stepsList];
     this.dataPoints = dataPoints == null ? [] : [...dataPoints];
+    this.magList = magList == null ? [] : [...magList];
   }
 
   Accelerometer.set(this.email) {
@@ -51,10 +48,9 @@ class Accelerometer {
     this.docId;
     this.collectionInterval;
     this.sendInterval;
-    this.totalDayDistance;
-    this.totalDistance;
+    stepsList = [];
     dataPoints = [];
-    distanceRecords = [];
+    magList = [];
   }
 
   Accelerometer.clone(Accelerometer p) {
@@ -63,10 +59,9 @@ class Accelerometer {
     email = p.email;
     collectionInterval = p.collectionInterval;
     sendInterval = p.sendInterval;
-    distanceRecords = distanceRecords == null ? [] : [...distanceRecords];
-    totalDayDistance = p.totalDayDistance;
-    totalDistance = p.totalDistance;
+    stepsList = p.stepsList == null ? [] : [...stepsList];
     dataPoints = p.dataPoints == null ? [] : [...dataPoints];
+    magList = p.magList == null ? [] : [...magList];
   }
 
   //a.copyFrom(b) ==> a = b
@@ -76,12 +71,12 @@ class Accelerometer {
     email = p.email;
     collectionInterval = p.collectionInterval;
     sendInterval = p.sendInterval;
-    totalDayDistance = p.totalDayDistance;
-    totalDistance = p.totalDistance;
     dataPoints.clear();
     dataPoints.addAll(p.dataPoints);
-    distanceRecords.clear();
-    distanceRecords.addAll(p.distanceRecords);
+    magList.clear();
+    magList.addAll(p.magList);
+    stepsList.clear();
+    stepsList.addAll(p.stepsList);
   }
 
   //serialization
@@ -92,9 +87,8 @@ class Accelerometer {
       DocKeyAccelerometer.collectionInterval.name: collectionInterval,
       DocKeyAccelerometer.sendInterval.name: sendInterval,
       DocKeyAccelerometer.dataPoints.name: dataPoints,
-      DocKeyAccelerometer.distanceRecords.name: distanceRecords,
-      DocKeyAccelerometer.totalDayDistance.name: totalDayDistance,
-      DocKeyAccelerometer.totalDistance.name: totalDistance,
+      DocKeyAccelerometer.magList.name: magList,
+      DocKeyAccelerometer.stepsList.name: stepsList,
     };
   }
 
@@ -110,9 +104,8 @@ class Accelerometer {
       sendInterval: doc[DocKeyAccelerometer.sendInterval.name.toString()] ??=
           '60',
       dataPoints: doc[DocKeyAccelerometer.dataPoints.name] ??= [],
-      distanceRecords: doc[DocKeyAccelerometer.distanceRecords.name] ??= [],
-      totalDayDistance: doc[DocKeyAccelerometer.totalDayDistance.name] ??= 0,
-      totalDistance: doc[DocKeyAccelerometer.totalDistance.name] ??= 0,
+      magList: doc[DocKeyAccelerometer.magList.name] ??= [],
+      stepsList: doc[DocKeyAccelerometer.stepsList.name] ??= [],
     );
   }
 

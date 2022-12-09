@@ -39,7 +39,6 @@ class _HomeState extends State<HomeScreen> {
   late String email;
   late List<dynamic> userPoints;
   late List<dynamic> collecetedPoints = [];
-  late List<dynamic> distRecs;
   double totalDis = 0;
   var formKey = GlobalKey<FormState>();
 
@@ -47,6 +46,7 @@ class _HomeState extends State<HomeScreen> {
   void initState() {
     super.initState();
     con = _Controller(this);
+    
     if (widget.accelerometer.dataPoints.isEmpty) {
       userPoints = [];
     } else {
@@ -73,7 +73,6 @@ class _HomeState extends State<HomeScreen> {
 
       print(widget.database[randNum].xValue);
       print(widget.database[randNum].yValue);
-      totalDis = widget.accelerometer.totalDistance;
 
       tempPoints[index] = {
         'x': widget.database[randNum].xValue,
@@ -90,7 +89,6 @@ class _HomeState extends State<HomeScreen> {
     Timer send = Timer.periodic(
         Duration(seconds: int.parse(widget.accelerometer.sendInterval!)),
         (timer) {
-      con.distanceCalc();
       if (widget.accelerometer.dataPoints.isNotEmpty) {
         collecetedPoints.removeAt(0);
       }
@@ -223,7 +221,7 @@ class _HomeState extends State<HomeScreen> {
                                     top: 85,
                                     left: 40,
                                     child: Text(
-                                      "${widget.accelerometer.totalDayDistance.toStringAsFixed(2)} km",
+                                      "STEPS",
                                       style: const TextStyle(
                                         fontFamily: 'Montserrat',
                                         fontSize: 30.0,
@@ -330,35 +328,52 @@ class _HomeState extends State<HomeScreen> {
                         ListView.builder(
                             shrinkWrap: true,
                             physics: ClampingScrollPhysics(),
-                            itemCount:
-                                widget.accelerometer.distanceRecords.length,
+                            itemCount: widget.accelerometer.magList.length,
                             itemBuilder: (BuildContext context, int index) {
-                              return 
-                              (index + 1 <= widget.accelerometer.distanceRecords.length) ?
-                              Card(
-                                child: ListTile(
-                                  leading: Icon(
-                                    Icons.run_circle_outlined,
-                                    color: Colors.blueAccent,
-                                    size: 50,
-                                  ),
-                                  title: Text(
-                                    'From ${DateFormat.yMd().add_jms().format(userPoints[index]['t'])} to ${DateFormat.yMd().add_jms().format(userPoints[index +1]['t'])}',
-                                    style: const TextStyle(
-                                      fontFamily: 'Montserrat',
-                                      fontSize: 10.0,
-                                      color: Colors.blueAccent,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    'You walked ${widget.accelerometer.distanceRecords[index].toStringAsFixed(2)} km!',
-                                    style: const TextStyle(
-                                      fontFamily: 'Montserrat',
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-                              ) : Text("");
+                              return (index + 1 <=
+                                      widget.accelerometer.magList.length)
+                                  ? Card(
+                                      child: ListTile(
+                                        isThreeLine: true,
+                                        leading: Icon(
+                                          Icons.run_circle_outlined,
+                                          color: Colors.blueAccent,
+                                          size: 50,
+                                        ),
+                                        title: Text(
+                                          'From ${DateFormat.yMd().add_jms().format(userPoints[index]['t'])} to ${DateFormat.yMd().add_jms().format(userPoints[index + 1]['t'])}',
+                                          style: const TextStyle(
+                                            fontFamily: 'Montserrat',
+                                            fontSize: 10.0,
+                                            color: Colors.blueAccent,
+                                          ),
+                                        ),
+                                        subtitle: Column(
+                                          children: [
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(3.0),
+                                              child: Text(
+                                                'You took ?? steps!',
+                                                style: const TextStyle(
+                                                  fontFamily: 'Montserrat',
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ),
+                                            Text(
+                                              '[x: ${widget.accelerometer.dataPoints[index]['x'].substring(0, 5)} y: ${widget.accelerometer.dataPoints[index]['y'].substring(0, 5)} z: ${widget.accelerometer.dataPoints[index]['z'].substring(0, 5)}] to [x: ${widget.accelerometer.dataPoints[index+1]['x'].substring(0, 3)} y: ${widget.accelerometer.dataPoints[index+1]['y'].substring(0, 3)} z: ${widget.accelerometer.dataPoints[index+1]['z'].substring(0, 3)}]',
+                                              style: const TextStyle(
+                                                fontFamily: 'Montserrat',
+                                                fontSize: 10.0,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  : Text("");
                             })
                       ],
                     ),
@@ -376,11 +391,71 @@ class _Controller {
   _Controller(this.state);
   DataPoints newPoint = DataPoints();
 
-  late List<DataPoints> pointsList;
-  List<dynamic> distancesList = [];
-  int randNum = Random().nextInt(6700); //starts at random point of data
-  List<dynamic> userPoints = [];
+  List<dynamic> stepsList = [];
+  List<dynamic> magnitudeList = [];
   Map<int, Map<String, dynamic>> tempPoints = {};
+  late Timer collect;
+  int steps = 0;
+  late Timer send;
+
+  void testButton() {
+    print("tf");
+  }
+
+  void startTimer() async {
+    // int randNum = Random().nextInt(6700); //starts at random point of data
+    int randNum = 0;
+    Map<int, Map<String, dynamic>> tempPoints = {};
+    print('collect seconds = ');
+    print(int.parse(state.widget.accelerometer.collectionInterval!));
+    //timer to collect data points
+    collect = Timer.periodic(
+        Duration(
+            seconds: int.parse(state.widget.accelerometer.collectionInterval!)),
+        (timer) {
+      int index = 0;
+
+      print('x: ${state.widget.database[randNum].xValue}');
+      print('y: ${state.widget.database[randNum].yValue}');
+      print('z: ${state.widget.database[randNum].zValue}');
+
+      tempPoints[index] = {
+        'x': state.widget.database[randNum].xValue,
+        'y': state.widget.database[randNum].yValue,
+        'z': state.widget.database[randNum].zValue,
+        "t": DateTime.now()
+      };
+
+      state.collecetedPoints.add(tempPoints[index]);
+      randNum++;
+      index++;
+      state.render(() {});
+    });
+
+    send = Timer.periodic(
+        Duration(seconds: int.parse(state.widget.accelerometer.sendInterval!)),
+        (timer) {
+      magCount();
+      stepCount();
+      if (state.widget.accelerometer.dataPoints.isNotEmpty) {
+        state.collecetedPoints.removeAt(0);
+      }
+      state.widget.accelerometer.sendToCloud(state.collecetedPoints);
+      state.userPoints.addAll(state.collecetedPoints);
+
+      //temp object gets last thing in collectedPoints
+      //clear collectedPoints
+      //add object back in list
+      var tempCollectedPoint =
+          state.collecetedPoints[state.collecetedPoints.length - 1];
+      state.collecetedPoints.clear();
+      state.collecetedPoints.add(tempCollectedPoint);
+      state.render(() {
+        state.userPoints = state.widget.accelerometer.dataPoints;
+        state.con.stepsList = state.widget.accelerometer.stepsList;
+      });
+    });
+  }
 
   void settingsPage() async {
     await Navigator.pushNamed(
@@ -415,28 +490,41 @@ class _Controller {
     Navigator.of(state.context).pop(); // push in drawer
   }
 
-  void distanceCalc() async {
-    //1.0 degrees = 111km
-    //0.1 degree = 11.1km
-    //http://wiki.gis.com/wiki/index.php/Decimal_degrees
-
-    distancesList.clear();
+  void magCount() async {
+    magnitudeList.clear();
     for (int i = 0; i < state.collecetedPoints.length - 1; i++) {
       var x = double.parse(state.collecetedPoints[i]['x']) -
           double.parse(state.collecetedPoints[i + 1]['x']);
       var y = double.parse(state.collecetedPoints[i]['y']) -
           double.parse(state.collecetedPoints[i + 1]['y']);
+      var z = double.parse(state.collecetedPoints[i]['z']) -
+          double.parse(state.collecetedPoints[i + 1]['z']);
 
-      var c2 = pow(x, 2) * pow(y, 2);
+      var c2 = pow(x, 2) + pow(y, 2) + pow(z, 2);
       var c = sqrt(c2);
 
-      var cKm = 111 * c;
-      distancesList.add(cKm);
+      magnitudeList.add(c);
     }
-    state.widget.accelerometer.distanceRecords.addAll(distancesList);
+    state.widget.accelerometer.magList.addAll(magnitudeList);
     Map<String, dynamic> updateInfo = {};
-    updateInfo[Accelerometer.DISTANCERECS] =
-        state.widget.accelerometer.distanceRecords;
+    updateInfo[Accelerometer.MAGNILIST] = state.widget.accelerometer.magList;
+    await FirestoreController.updateUser(
+        docId: state.widget.accelerometer.docId!, updateInfo: updateInfo);
+  }
+
+  void stepCount() async {
+    stepsList.clear();
+    for (int i = 0; i < state.widget.accelerometer.magList.length; i++) {
+      print('====MAGNITUDE: ${state.widget.accelerometer.magList[i]}');
+      steps = 0;
+      if (state.widget.accelerometer.magList[i] > 3) {
+        steps++;
+      }
+      stepsList.add(steps);
+    }
+    //testing stuff
+    Map<String, dynamic> updateInfo = {};
+    updateInfo[Accelerometer.STEPS] = stepsList;
     await FirestoreController.updateUser(
         docId: state.widget.accelerometer.docId!, updateInfo: updateInfo);
   }
