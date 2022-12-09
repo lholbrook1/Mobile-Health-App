@@ -58,12 +58,20 @@ class _HomeState extends State<HomeScreen> {
       userPoints = [];
     } else {
       userPoints = widget.accelerometer.dataPoints;
+      con.stepsList = widget.accelerometer.stepsList;
+      for (int n = 0; n < con.stepsList.length; n++) {
+        if (con.stepsList[n] == 1) {
+          totalSteps++;
+        }
+      }
       for (int i = 0; i < userPoints.length; i++) {
         if (userPoints[i]['t'] is Timestamp) {
           userPoints[i]['t'] = DateTime.fromMillisecondsSinceEpoch(
               userPoints[i]['t'].millisecondsSinceEpoch);
         }
       }
+
+      con.setActivePeriod();
       print('======userpoints length: ${userPoints.length}');
       print('======userpoints 1: ${userPoints[0]}');
     }
@@ -72,6 +80,7 @@ class _HomeState extends State<HomeScreen> {
 
   void render(fn) {
     setState(fn);
+    con.setActivePeriod();
   }
 
   @override
@@ -113,11 +122,11 @@ class _HomeState extends State<HomeScreen> {
                   title: const Text('Settings'),
                   onTap: con.settingsPage,
                 ),
-                ListTile(
-                  leading: const Icon(Icons.list_alt_outlined),
-                  title: const Text('Timestamps'),
-                  onTap: con.timestampsPage,
-                ),
+                // ListTile(
+                //   leading: const Icon(Icons.list_alt_outlined),
+                //   title: const Text('Timestamps'),
+                //   onTap: con.timestampsPage,
+                // ),
                 ListTile(
                   leading: const Icon(Icons.exit_to_app),
                   title: const Text('Log Out'),
@@ -139,6 +148,7 @@ class _HomeState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Padding(
                               padding: const EdgeInsets.all(11.0),
@@ -208,7 +218,7 @@ class _HomeState extends State<HomeScreen> {
                                     top: 85,
                                     left: 40,
                                     child: Text(
-                                      "STEPS",
+                                      "${totalSteps} steps",
                                       style: const TextStyle(
                                         fontFamily: 'Montserrat',
                                         fontSize: 30.0,
@@ -275,33 +285,51 @@ class _HomeState extends State<HomeScreen> {
                           ],
                         ),
                         const Text(
-                          "Activity Review (Day/Week/Month)",
+                          // ---------------------------------------------- MOST ACTIVE PERIOD
+                          "My Most Active Period",
                           style: TextStyle(
                             fontFamily: 'MontserratBlack',
                             fontSize: 20.0,
                             color: Colors.blueAccent,
                           ),
                         ),
-                        Container(
-                          margin: const EdgeInsets.symmetric(
-                            vertical: 25.0,
-                            horizontal: 25.0,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.lightBlue[50],
-                            borderRadius: BorderRadius.circular(15),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.blueGrey.withOpacity(0.15),
-                                spreadRadius: 1,
-                                blurRadius: 3,
-                                offset: const Offset(
-                                    0, 3), // changes position of shadow
+                        Stack(
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.symmetric(
+                                vertical: 25.0,
+                                horizontal: 25.0,
                               ),
-                            ],
-                          ),
-                          height: 100.0,
-                          width: 350.0,
+                              decoration: BoxDecoration(
+                                color: Colors.lightBlue[50],
+                                borderRadius: BorderRadius.circular(15),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.blueGrey.withOpacity(0.15),
+                                    spreadRadius: 1,
+                                    blurRadius: 3,
+                                    offset: const Offset(
+                                        0, 3), // changes position of shadow
+                                  ),
+                                ],
+                              ),
+                              height: 100.0,
+                              width: 350.0,
+                            ),
+                            Positioned(
+                              top: 50,
+                              left: 90,
+                              child: Text(
+                                "${con.activePeriod}",
+                                style: const TextStyle(
+                                  fontFamily: 'Montserrat',
+                                  fontSize: 15.0,
+                                  color: Colors.black,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
                         ),
                         const Text(
                           "Steps",
@@ -384,6 +412,7 @@ class _Controller {
   late Timer collect;
   int steps = 0;
   late Timer send;
+  String activePeriod = '';
 
   void testButton() {
     print("tf");
@@ -532,18 +561,38 @@ class _Controller {
       if (state.widget.accelerometer.magList[i] > 3) {
         steps++;
         state.totalSteps++;
-        if (state.widget.accelerometer.dataPoints[i + 1]["t"] >=
-            (DateTime.now())
-                .subtract(new Duration(minutes: Duration.minutesPerDay))) {
-          state.todaySteps++;
-        }
       }
       stepsList.add(steps);
     }
+    state.widget.accelerometer.stepsList = stepsList;
     //testing stuff
     Map<String, dynamic> updateInfo = {};
     updateInfo[Accelerometer.STEPS] = stepsList;
     await FirestoreController.updateUser(
         docId: state.widget.accelerometer.docId!, updateInfo: updateInfo);
+  }
+
+  void setActivePeriod() {
+    bool step = false;
+    // look through datapoints and find first 2 in a row with 1 step
+    // activePeriod = timestamp of dataPoint[i-2] + - + timestamp of data point[i]
+    for (int i = 1; i < state.widget.accelerometer.dataPoints.length; i++) {
+      if (step && state.widget.accelerometer.stepsList[i - 1] == 1) {
+        // set activePeriod string
+        if (i > 1)
+          activePeriod +=
+              ' to\n ${DateFormat.yMd().add_jms().format(state.userPoints[i]['t'])}';
+
+        break;
+      } else if (step) {
+        step = false;
+        activePeriod = '';
+      }
+      if (!step && state.widget.accelerometer.stepsList[i - 1] == 1) {
+        step = true;
+        activePeriod =
+            'From ${DateFormat.yMd().add_jms().format(state.userPoints[i - 1]['t'])}\n';
+      }
+    }
   }
 }

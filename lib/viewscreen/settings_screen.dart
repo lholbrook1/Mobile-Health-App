@@ -23,8 +23,8 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsState extends State<SettingsScreen> {
   late _Controller con;
-  String interval = "60";
-  String dataSend = '61';
+  late String interval;
+  late String dataSend;
   late String email;
 
   @override
@@ -32,6 +32,8 @@ class _SettingsState extends State<SettingsScreen> {
     super.initState();
     con = _Controller(this);
     email = widget.user.email ?? 'No email';
+    interval = widget.accelerometer.collectionInterval ??= '5';
+    dataSend = widget.accelerometer.sendInterval ??= '16';
   }
 
   void render(fn) => setState(fn);
@@ -59,7 +61,7 @@ class _SettingsState extends State<SettingsScreen> {
               ),
               DropdownButton(
                 items: Constants.collectMenuItems,
-                value: interval,
+                value: widget.accelerometer.collectionInterval,
                 onChanged: con.changeCollectionInterval,
                 hint: const Text('Timestamps'),
               ),
@@ -76,7 +78,7 @@ class _SettingsState extends State<SettingsScreen> {
               ),
               DropdownButton(
                 items: Constants.sendMenuItems,
-                value: dataSend,
+                value: widget.accelerometer.sendInterval,
                 onChanged: con.changeSendInterval,
                 hint: const Text('Timestamps'),
               )
@@ -103,7 +105,7 @@ class _Controller {
   void changeSendInterval(String? value) {
     if (value != null) {
       state.widget.accelerometer.setSendInterval(value);
-      state.interval = value;
+      state.dataSend = value;
       state.render(() {});
     }
   }

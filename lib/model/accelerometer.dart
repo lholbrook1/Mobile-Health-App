@@ -32,8 +32,8 @@ class Accelerometer {
     this.uid,
     this.docId,
     this.email = '',
-    this.collectionInterval = '60',
-    this.sendInterval = '60',
+    this.collectionInterval = '5',
+    this.sendInterval = '16',
     List<dynamic>? stepsList,
     List<dynamic>? dataPoints,
     List<dynamic>? magList,
@@ -100,9 +100,9 @@ class Accelerometer {
       docId: docId,
       email: doc[DocKeyAccelerometer.email.name] ??= 'N/A',
       collectionInterval:
-          doc[DocKeyAccelerometer.collectionInterval.name.toString()] ??= '60',
+          doc[DocKeyAccelerometer.collectionInterval.name.toString()] ??= '5',
       sendInterval: doc[DocKeyAccelerometer.sendInterval.name.toString()] ??=
-          '60',
+          '16',
       dataPoints: doc[DocKeyAccelerometer.dataPoints.name] ??= [],
       magList: doc[DocKeyAccelerometer.magList.name] ??= [],
       stepsList: doc[DocKeyAccelerometer.stepsList.name] ??= [],

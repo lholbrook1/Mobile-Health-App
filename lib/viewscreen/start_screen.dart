@@ -132,7 +132,7 @@ class _StartState extends State<StartScreen> {
                                   backgroundColor: Colors.blueAccent,
                                 ),
                                 child: const Text(
-                                  'Sign in',
+                                  'Sign up',
                                 ),
                               ),
                             ],
@@ -158,8 +158,8 @@ class _StartState extends State<StartScreen> {
             ),
           ),
           Positioned(
-            top: 563.0,
-            left: 147.0,
+            top: 650.0,
+            left: MediaQuery.of(context).size.width / 2.9,
             child: TextButton(
               onPressed: () => showDialog(
                 context: context,
@@ -279,6 +279,8 @@ class _Controller {
       newAccel.email = email!.trim(); //keeps track of distance traveled for day
       newAccel.dataPoints = [];
       newAccel.uid = FirebaseAuth.instance.currentUser?.uid;
+      newAccel.collectionInterval = '5';
+      newAccel.sendInterval = '16';
       FirestoreController.addUser(userProf: newAccel);
       showSnackBar(
         context: state.context,
