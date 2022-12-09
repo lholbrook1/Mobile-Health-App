@@ -45,6 +45,8 @@ class _HomeState extends State<HomeScreen> {
   late List<dynamic> userPoints;
   late List<dynamic> collecetedPoints = [];
   double totalDis = 0;
+  int totalSteps = 0;
+  int todaySteps = 0;
   var formKey = GlobalKey<FormState>();
 
   @override
@@ -259,7 +261,7 @@ class _HomeState extends State<HomeScreen> {
                                     top: 85,
                                     left: 40,
                                     child: Text(
-                                      "${totalDis.toStringAsFixed(2)} km",
+                                      "${totalSteps} steps",
                                       style: const TextStyle(
                                         fontFamily: 'Montserrat',
                                         fontSize: 30.0,
@@ -339,7 +341,7 @@ class _HomeState extends State<HomeScreen> {
                                               padding:
                                                   const EdgeInsets.all(3.0),
                                               child: Text(
-                                                'You took ?? steps!',
+                                                'You took ${con.stepsList[index]} steps!',
                                                 style: const TextStyle(
                                                   fontFamily: 'Montserrat',
                                                   color: Colors.black,
@@ -461,10 +463,7 @@ class _Controller {
           state.collecetedPoints[state.collecetedPoints.length - 1];
       state.collecetedPoints.clear();
       state.collecetedPoints.add(tempCollectedPoint);
-      state.render(() {
-        state.userPoints = state.widget.accelerometer.dataPoints;
-        state.con.stepsList = state.widget.accelerometer.stepsList;
-      });
+      state.render(() {});
     });
   }
 
@@ -525,11 +524,19 @@ class _Controller {
 
   void stepCount() async {
     stepsList.clear();
+    state.totalSteps = 0;
+    state.todaySteps = 0;
     for (int i = 0; i < state.widget.accelerometer.magList.length; i++) {
       print('====MAGNITUDE: ${state.widget.accelerometer.magList[i]}');
       steps = 0;
       if (state.widget.accelerometer.magList[i] > 3) {
         steps++;
+        state.totalSteps++;
+        if (state.widget.accelerometer.dataPoints[i + 1]["t"] >=
+            (DateTime.now())
+                .subtract(new Duration(minutes: Duration.minutesPerDay))) {
+          state.todaySteps++;
+        }
       }
       stepsList.add(steps);
     }
