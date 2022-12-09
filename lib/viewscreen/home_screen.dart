@@ -53,56 +53,14 @@ class _HomeState extends State<HomeScreen> {
       userPoints = widget.accelerometer.dataPoints;
       for (int i = 0; i < userPoints.length; i++) {
         if (userPoints[i]['t'] is Timestamp) {
-          userPoints[i]['t'] = DateTime.fromMillisecondsSinceEpoch(userPoints[i]['t'].millisecondsSinceEpoch);
+          userPoints[i]['t'] = DateTime.fromMillisecondsSinceEpoch(
+              userPoints[i]['t'].millisecondsSinceEpoch);
         }
       }
       print('======userpoints length: ${userPoints.length}');
       print('======userpoints 1: ${userPoints[0]}');
     }
-    
     email = widget.user.email ?? 'No email';
-    int randNum = Random().nextInt(6700); //starts at random point of data
-    Map<int, Map<String, dynamic>> tempPoints = {};
-    print('collect seconds = ');
-    print(int.parse(widget.accelerometer.collectionInterval!));
-    //timer to collect data points
-    Timer collect = Timer.periodic(
-        Duration(seconds: int.parse(widget.accelerometer.collectionInterval!)),
-        (timer) {
-      int index = 0;
-
-      print(widget.database[randNum].xValue);
-      print(widget.database[randNum].yValue);
-
-      tempPoints[index] = {
-        'x': widget.database[randNum].xValue,
-        'y': widget.database[randNum].yValue,
-        "t": DateTime.now()
-      };
-
-      collecetedPoints.add(tempPoints[index]);
-      randNum++;
-      index++;
-      render(() {});
-    });
-
-    Timer send = Timer.periodic(
-        Duration(seconds: int.parse(widget.accelerometer.sendInterval!)),
-        (timer) {
-      if (widget.accelerometer.dataPoints.isNotEmpty) {
-        collecetedPoints.removeAt(0);
-      }
-      widget.accelerometer.sendToCloud(collecetedPoints);
-      userPoints.addAll(collecetedPoints);
-
-      //temp object gets last thing in collectedPoints
-      //clear collectedPoints
-      //add object back in list
-      var tempCollectedPoint = collecetedPoints[collecetedPoints.length - 1];
-      collecetedPoints.clear();
-      collecetedPoints.add(tempCollectedPoint);
-      render(() {});
-    });
   }
 
   void render(fn) {
@@ -167,9 +125,25 @@ class _HomeState extends State<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.all(11.0),
-                          child: Divider(),
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(11.0),
+                              child: ElevatedButton(
+                                child: Text("Start"),
+                                onPressed: () {
+                                  con.startTimer();
+                                },
+                              ),
+                            ),
+                            ElevatedButton(
+                              child: Text("End"),
+                              onPressed: () {
+                                con.collect.cancel();
+                                con.send.cancel();
+                              },
+                            ),
+                          ],
                         ),
                         const Text(
                           "Distance Traveled",
@@ -362,7 +336,7 @@ class _HomeState extends State<HomeScreen> {
                                               ),
                                             ),
                                             Text(
-                                              '[x: ${widget.accelerometer.dataPoints[index]['x'].substring(0, 5)} y: ${widget.accelerometer.dataPoints[index]['y'].substring(0, 5)} z: ${widget.accelerometer.dataPoints[index]['z'].substring(0, 5)}] to [x: ${widget.accelerometer.dataPoints[index+1]['x'].substring(0, 3)} y: ${widget.accelerometer.dataPoints[index+1]['y'].substring(0, 3)} z: ${widget.accelerometer.dataPoints[index+1]['z'].substring(0, 3)}]',
+                                              '[x: ${widget.accelerometer.dataPoints[index]['x'].substring(0, 3)} y: ${widget.accelerometer.dataPoints[index]['y'].substring(0, 3)} z: ${widget.accelerometer.dataPoints[index]['z'].substring(0, 3)}] to [x: ${widget.accelerometer.dataPoints[index+1]['x'].substring(0, 3)} y: ${widget.accelerometer.dataPoints[index+1]['y'].substring(0, 3)} z: ${widget.accelerometer.dataPoints[index+1]['z'].substring(0, 3)}]',
                                               style: const TextStyle(
                                                 fontFamily: 'Montserrat',
                                                 fontSize: 10.0,
