@@ -12,6 +12,8 @@ import 'settings_screen.dart';
 import 'dart:math';
 import 'package:intl/intl.dart';
 
+import 'package:sensors/sensors.dart';
+
 import 'start_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -34,6 +36,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeState extends State<HomeScreen> {
+  StreamSubscription? accel;
+  AccelerometerEvent? event;
+
   late _Controller con;
   bool run = false;
   late String email;
@@ -46,7 +51,7 @@ class _HomeState extends State<HomeScreen> {
   void initState() {
     super.initState();
     con = _Controller(this);
-    
+
     if (widget.accelerometer.dataPoints.isEmpty) {
       userPoints = [];
     } else {
@@ -65,6 +70,12 @@ class _HomeState extends State<HomeScreen> {
 
   void render(fn) {
     setState(fn);
+  }
+
+  @override
+  void dispose() {
+    accel?.cancel();
+    super.dispose();
   }
 
   @override
@@ -336,7 +347,7 @@ class _HomeState extends State<HomeScreen> {
                                               ),
                                             ),
                                             Text(
-                                              '[x: ${widget.accelerometer.dataPoints[index]['x'].substring(0, 3)} y: ${widget.accelerometer.dataPoints[index]['y'].substring(0, 3)} z: ${widget.accelerometer.dataPoints[index]['z'].substring(0, 3)}] to [x: ${widget.accelerometer.dataPoints[index+1]['x'].substring(0, 3)} y: ${widget.accelerometer.dataPoints[index+1]['y'].substring(0, 3)} z: ${widget.accelerometer.dataPoints[index+1]['z'].substring(0, 3)}]',
+                                              '[x: ${widget.accelerometer.dataPoints[index]['x'].substring(0, 3)} y: ${widget.accelerometer.dataPoints[index]['y'].substring(0, 3)} z: ${widget.accelerometer.dataPoints[index]['z'].substring(0, 3)}] to [x: ${widget.accelerometer.dataPoints[index + 1]['x'].substring(0, 3)} y: ${widget.accelerometer.dataPoints[index + 1]['y'].substring(0, 3)} z: ${widget.accelerometer.dataPoints[index + 1]['z'].substring(0, 3)}]',
                                               style: const TextStyle(
                                                 fontFamily: 'Montserrat',
                                                 fontSize: 10.0,
@@ -377,6 +388,15 @@ class _Controller {
   }
 
   void startTimer() async {
+    //accelerometer stuff
+    if (state.accel == null) {
+      state.accel = accelerometerEvents.listen((AccelerometerEvent e) {
+        state.event = e;
+      });
+    } else {
+      state.accel!.resume();
+    }
+
     // int randNum = Random().nextInt(6700); //starts at random point of data
     int randNum = 0;
     Map<int, Map<String, dynamic>> tempPoints = {};
@@ -388,17 +408,34 @@ class _Controller {
             seconds: int.parse(state.widget.accelerometer.collectionInterval!)),
         (timer) {
       int index = 0;
+      Map<String, dynamic> tempPoint = {
+        'x': state.event!.x.toStringAsFixed(3),
+        'y': state.event!.y.toStringAsFixed(3),
+        'z': state.event!.z.toStringAsFixed(3),
+        "t": DateTime.now()
+      };
+
+      print(" || x: " +
+          tempPoint['x'] +
+          " || y: " +
+          tempPoint['y'] +
+          " || z: " +
+          tempPoint['z']);
 
       print('x: ${state.widget.database[randNum].xValue}');
       print('y: ${state.widget.database[randNum].yValue}');
       print('z: ${state.widget.database[randNum].zValue}');
 
-      tempPoints[index] = {
-        'x': state.widget.database[randNum].xValue,
-        'y': state.widget.database[randNum].yValue,
-        'z': state.widget.database[randNum].zValue,
-        "t": DateTime.now()
-      };
+      if (tempPoint.isEmpty) {
+        tempPoints[index] = {
+          'x': state.widget.database[randNum].xValue,
+          'y': state.widget.database[randNum].yValue,
+          'z': state.widget.database[randNum].zValue,
+          "t": DateTime.now()
+        };
+      } else {
+        tempPoints[index] = tempPoint;
+      }
 
       state.collecetedPoints.add(tempPoints[index]);
       randNum++;
